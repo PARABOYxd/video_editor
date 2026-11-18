@@ -1,0 +1,306 @@
+@import "tailwindcss";
+
+/*
+ * Design system: editorial / cinematic.
+ * Warm off-white dominates, black carries hierarchy, rust appears rarely.
+ *
+ * Contrast note (WCAG AA on #F5F3EE):
+ *   #77736D (secondary) = 4.25:1 → large text (18px+) or on white only.
+ *   #96918A (muted)     = 2.82:1 → non-text details only (rules, numerals),
+ *                                   or text on the dark media background.
+ *   Small secondary text uses --color-secondary-aa (#6E6A64, 4.85:1),
+ *   visually the same grey.
+ */
+@theme {
+  --color-paper: #f5f3ee;
+  --color-ink: #171717;
+  --color-secondary: #77736d;
+  --color-secondary-aa: #6e6a64;
+  --color-muted: #96918a;
+  --color-accent: #a64d32;
+  --color-accent-hover: #873d29;
+  --color-line: #d8d4cc;
+  --color-surface: #ffffff;
+  --color-media: #111111;
+
+  --font-display: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --radius-sm: 2px;
+  --radius: 4px;
+  --radius-md: 6px;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  /* 1440 max width, 1280 content, 64 / 32 / 20 side padding */
+  .container-site {
+    width: 100%;
+    max-width: 1408px;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+  @media (min-width: 768px) {
+    .container-site {
+      padding-inline: 32px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-site {
+      padding-inline: 64px;
+    }
+  }
+
+  /* Section rhythm: 64-80 mobile, 88-104 tablet, 120-144 desktop */
+  .section {
+    padding-block: 72px;
+  }
+  @media (min-width: 768px) {
+    .section {
+      padding-block: 96px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .section {
+      padding-block: 136px;
+    }
+  }
+
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+  }
+  @media (min-width: 1024px) {
+    .grid-12 {
+      column-gap: 32px;
+    }
+  }
+
+  /* Type scale */
+  .t-hero {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-stretch: 88%;
+    font-size: clamp(42px, 7.2vw, 96px);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+  .t-page {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-stretch: 88%;
+    font-size: clamp(42px, 6vw, 84px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+  .t-section {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-stretch: 88%;
+    font-size: clamp(34px, 4.6vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+  }
+  .t-project {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(22px, 2vw, 28px);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+  /* Editorial italic, used sparingly inside headings */
+  .t-italic {
+    font-style: italic;
+    font-weight: 400;
+    font-stretch: 100%;
+    text-transform: none;
+    letter-spacing: -0.03em;
+  }
+  .t-meta {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    line-height: 1.5;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .t-lead {
+    font-size: clamp(16px, 1.25vw, 18px);
+    line-height: 1.65;
+  }
+
+  /* Buttons: small radius, uppercase, quick transitions */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 22px;
+    border-radius: var(--radius);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+  }
+  .btn-primary {
+    background: var(--color-ink);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--color-accent);
+  }
+  .btn-accent {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .btn-accent:hover {
+    background: var(--color-accent-hover);
+  }
+  .btn-outline {
+    border: 1px solid var(--color-ink);
+    color: var(--color-ink);
+  }
+  .btn-outline:hover {
+    background: var(--color-ink);
+    color: #fff;
+  }
+  .btn-light {
+    background: #fff;
+    color: var(--color-ink);
+  }
+  .btn-light:hover {
+    background: var(--color-accent);
+    color: #fff;
+  }
+  .btn .arrow,
+  .link-arrow .arrow {
+    display: inline-block;
+    transition: transform 200ms ease;
+  }
+  .btn:hover .arrow,
+  .link-arrow:hover .arrow,
+  .group:hover .arrow {
+    transform: translateX(4px);
+  }
+
+  /* Text link with arrow */
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid currentColor;
+    min-height: auto;
+    padding-block: 4px;
+  }
+  .link-u {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+    transition: text-decoration-color 200ms;
+  }
+  .link-u:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* Forms (contact + admin) */
+  .field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .field-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 11px 14px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    font-size: 16px; /* 16px stops iOS zooming into fields */
+    color: var(--color-ink);
+    transition: border-color 200ms;
+  }
+  .field-input:focus {
+    outline: none;
+    border-color: var(--color-ink);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
+  }
+  .field-input[aria-invalid="true"] {
+    border-color: #b42318;
+  }
+  .field-error {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #b42318;
+  }
+
+  /* Restrained reveal: content is visible without JS; the class is added
+     by <Reveal> only once JS is running. */
+  .reveal-ready {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 500ms var(--ease-out-soft), transform 500ms var(--ease-out-soft);
+  }
+  .reveal-ready.is-in {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal-ready {
+    opacity: 1;
+    transform: none;
+  }
+}
