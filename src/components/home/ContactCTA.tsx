@@ -15,15 +15,15 @@ export default function ContactCTA({ profile, title = "Have something in mind?" 
             Start a project <span className="arrow" aria-hidden>→</span>
           </Link>
         </div>
-        <ul className="col-span-12 space-y-2 self-end text-[16px] md:col-span-5 md:col-start-8 md:text-right">
+        <ul className="col-span-12 space-y-4 self-end text-[16px] md:col-span-5 md:col-start-8 md:text-right">
           {profile.email && (
             <li>
-              <a href={`mailto:${profile.email}`} className="link-u break-all">{profile.email}</a>
+              <a href={`mailto:${profile.email}`} className="tap-target link-u [overflow-wrap:anywhere]">{profile.email}</a>
             </li>
           )}
           {profile.whatsapp && (
             <li>
-              <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noopener noreferrer" className="link-u">
+              <a href={`https://wa.me/${profile.whatsapp}`} target="_blank" rel="noopener noreferrer" className="tap-target link-u">
                 WhatsApp {profile.phone}
               </a>
             </li>

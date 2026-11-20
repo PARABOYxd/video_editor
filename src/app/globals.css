@@ -221,17 +221,26 @@
 
   /* Text link with arrow */
   .link-arrow {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 44px;
     font-size: 13px;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     border-bottom: 1px solid currentColor;
-    min-height: auto;
     padding-block: 4px;
+  }
+  /* Invisible hit area: grows the tap target to 44px+ without moving the underline. */
+  .link-arrow::after,
+  .tap-target::after {
+    content: "";
+    position: absolute;
+    inset: -8px -4px;
+  }
+  .tap-target {
+    position: relative;
   }
   .link-u {
     text-decoration: underline;

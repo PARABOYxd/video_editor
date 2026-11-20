@@ -44,7 +44,7 @@ export default function ProjectGrid({
                 type="button"
                 onClick={() => select(c.slug)}
                 aria-pressed={on}
-                className={`min-h-11 rounded px-3 text-[14px] transition-colors duration-200 ${
+                className={`min-h-11 min-w-11 rounded px-3 text-[14px] transition-colors duration-200 ${
                   on ? "bg-ink text-white" : "text-secondary-aa hover:text-ink"
                 }`}
               >

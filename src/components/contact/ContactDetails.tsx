@@ -14,10 +14,10 @@ export default function ContactDetails({ profile }: { profile: Profile }) {
   return (
     <dl className="border-t border-ink">
       {rows.map((r) => (
-        <div key={r.label} className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-line py-4">
+        <div key={r.label} className="flex flex-col gap-1 border-b border-line py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
           <dt className="t-meta text-secondary-aa">{r.label}</dt>
-          <dd className="min-w-0 text-right text-[16px]">
-            <a href={r.href} className="link-u break-all" {...(r.external && { target: "_blank", rel: "noopener noreferrer" })}>
+          <dd className="min-w-0 text-[16px] sm:text-right">
+            <a href={r.href} className="tap-target link-u [overflow-wrap:anywhere]" {...(r.external && { target: "_blank", rel: "noopener noreferrer" })}>
               {r.value}
             </a>
           </dd>

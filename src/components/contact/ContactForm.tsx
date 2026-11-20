@@ -102,7 +102,7 @@ export default function ContactForm({ defaultType = "" }: { defaultType?: string
       </div>
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-4 sm:col-span-2">
-        <button type="submit" className="btn btn-accent" disabled={pending} aria-busy={pending}>
+        <button type="submit" className="btn btn-accent w-full sm:w-auto" disabled={pending} aria-busy={pending}>
           {pending ? "Sending…" : "Send inquiry"} {!pending && <span className="arrow" aria-hidden>→</span>}
         </button>
         {state.status === "error" && state.message && (

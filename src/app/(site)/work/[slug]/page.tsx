@@ -53,7 +53,7 @@ export default async function ProjectPage({ params }: PageProps<"/work/[slug]">)
       {/* Title block */}
       <header className="container-site pb-12 pt-10 md:pb-16 md:pt-16">
         <nav aria-label="Breadcrumb" className="t-meta text-secondary-aa">
-          <Link href="/work" className="link-u hover:text-ink">Work</Link>
+          <Link href="/work" className="tap-target link-u hover:text-ink">Work</Link>
           <span aria-hidden> / </span>
           <span className="text-ink">{project.title}</span>
         </nav>
