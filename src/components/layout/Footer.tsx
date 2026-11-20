@@ -8,7 +8,6 @@ const NAV = [
   { href: "/about", label: "About" },
   { href: "/services", label: "Services" },
   { href: "/contact", label: "Contact" },
-  { href: "/videos-overview.html", label: "Video Showcase ↗" },
 ];
 
 export default function Footer({ profile }: { profile: Profile }) {
