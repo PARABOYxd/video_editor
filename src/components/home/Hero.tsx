@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Play } from "lucide-react";
+import { Play, Volume2 } from "lucide-react";
+import ReelLightbox from "./ReelLightbox";
 import Img from "../ui/Img";
 import PlaceholderFrame from "../ui/PlaceholderFrame";
 import HoverVideo from "../ui/HoverVideo";
@@ -27,6 +28,36 @@ export default function Hero({ profile, featured }: { profile: Profile; featured
   const still = profile.showreelPoster || (featured ? thumbnailOf(featured) : "");
   const caption = profile.showreelPoster ? "Showreel" : featured ? `${featured.title}${featured.categoryName ? ` · ${featured.categoryName}` : ""}` : "";
 
+  // What the frame plays: the showreel, else the first featured film.
+  const reelUrl = profile.showreelUrl || featured?.videoUrl || "";
+  const reelPoster = profile.showreelUrl ? profile.showreelPoster : featured ? featured.posterUrl || thumbnailOf(featured) : "";
+  const reelTitle = profile.showreelUrl ? `${profile.shortName} showreel` : (featured?.title ?? "Showreel");
+  const loop = /\.(mp4|webm|mov)(\?|$)/i.test(reelUrl) ? reelUrl : "";
+
+  const frame = (
+    <>
+      <div className="relative aspect-video overflow-hidden rounded bg-media">
+        {still ? (
+          <Img src={still} alt={`${caption}: video still`} fill priority sizes="(min-width: 1408px) 1280px, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.015]" />
+        ) : (
+          <PlaceholderFrame label="Placeholder · add a showreel still in the admin" />
+        )}
+        {loop && <HoverVideo src={loop} mode="auto" />}
+        {reelUrl && (
+          <>
+            <span className="absolute bottom-4 left-4 flex items-center gap-3 rounded bg-white py-2.5 pl-3.5 pr-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink transition-colors duration-200 group-hover:bg-accent group-hover:text-white md:bottom-7 md:left-7">
+              <Play className="h-3.5 w-3.5 fill-current" aria-hidden /> {profile.showreelUrl ? "Watch the reel" : "Watch the film"}
+            </span>
+            <span className="absolute right-4 top-4 flex items-center gap-1.5 rounded bg-black/60 px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-white backdrop-blur-sm md:right-7 md:top-7">
+              <Volume2 className="h-3.5 w-3.5" aria-hidden /> Sound on
+            </span>
+          </>
+        )}
+      </div>
+      {caption && <p className="t-meta mt-3 text-secondary-aa">{caption}</p>}
+    </>
+  );
+
   return (
     <section className="container-site pb-16 pt-12 md:pb-24 md:pt-20">
       <div className="grid-12 gap-y-8">
@@ -50,21 +81,16 @@ export default function Hero({ profile, featured }: { profile: Profile; featured
         </div>
       </div>
 
-      {/* Opening frame: links to the showreel below */}
-      <a href="#showreel" className="group mt-14 block md:mt-20" aria-label="Watch the showreel">
-        <div className="relative aspect-video overflow-hidden rounded bg-media">
-          {still ? (
-            <Img src={still} alt={`${caption}: video still`} fill priority sizes="(min-width: 1408px) 1280px, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.015]" />
-          ) : (
-            <PlaceholderFrame label="Placeholder · add a showreel still in the admin" />
-          )}
-          {/\.(mp4|webm|mov)(\?|$)/i.test(profile.showreelUrl) && <HoverVideo src={profile.showreelUrl} mode="auto" />}
-          <span className="absolute bottom-5 left-5 flex items-center gap-3 rounded bg-white py-2.5 pl-3.5 pr-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink transition-colors duration-200 group-hover:bg-accent group-hover:text-white md:bottom-7 md:left-7">
-            <Play className="h-3.5 w-3.5 fill-current" aria-hidden /> Watch the reel
-          </span>
-        </div>
-        {caption && <p className="t-meta mt-3 text-secondary-aa">{caption}</p>}
-      </a>
+      {/* Opening frame: a muted loop; one tap opens the reel full screen with sound. */}
+      <div id="showreel" className="mt-14 scroll-mt-24 md:mt-20">
+        {reelUrl ? (
+          <ReelLightbox url={reelUrl} poster={reelPoster} title={reelTitle} label={`Play the ${profile.showreelUrl ? "showreel" : "featured film"} with sound`}>
+            {frame}
+          </ReelLightbox>
+        ) : (
+          frame
+        )}
+      </div>
     </section>
   );
 }

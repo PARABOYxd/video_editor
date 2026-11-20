@@ -237,7 +237,11 @@
   .tap-target::after {
     content: "";
     position: absolute;
-    inset: -8px -4px;
+    left: -4px;
+    right: -4px;
+    top: 50%;
+    height: max(100%, 44px);
+    translate: 0 -50%;
   }
   .tap-target {
     position: relative;
@@ -285,6 +289,64 @@
     color: #b42318;
   }
 
+  /* Video player */
+  .vp-btn {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: var(--radius);
+    transition: background-color 150ms;
+  }
+  .vp-btn:hover {
+    background: rgb(255 255 255 / 0.15);
+  }
+  /* Seek bar: played (accent) over buffered (light) over track. Tall hit area, thin line. */
+  .vp-range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 24px;
+    background: transparent;
+    cursor: pointer;
+    --track: linear-gradient(
+      to right,
+      var(--color-accent) var(--played, 0%),
+      rgb(255 255 255 / 0.45) var(--played, 0%) var(--buffered, 0%),
+      rgb(255 255 255 / 0.2) var(--buffered, 0%)
+    );
+  }
+  .vp-range::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--track);
+    transition: height 150ms;
+  }
+  .vp-range::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--track);
+  }
+  .vp-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    margin-top: -5px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgb(166 77 50 / 0.35);
+  }
+  .vp-range::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .vp-range:focus-visible {
+    outline-offset: 0;
+  }
+
   /* Restrained reveal: content is visible without JS; the class is added
      by <Reveal> only once JS is running. */
   .reveal-ready {
@@ -295,6 +357,24 @@
   .reveal-ready.is-in {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes reel-in {
+  from {
+    opacity: 0;
+    scale: 0.98;
+  }
+}
+
+@keyframes vp-skip {
+  from {
+    opacity: 1;
+    scale: 0.85;
+  }
+  to {
+    opacity: 0;
+    scale: 1.15;
   }
 }
 

@@ -3,7 +3,6 @@ import ContactCTA from "@/components/home/ContactCTA";
 import FeaturedWork from "@/components/home/FeaturedWork";
 import Hero from "@/components/home/Hero";
 import ServicesPreview from "@/components/home/ServicesPreview";
-import Showreel from "@/components/home/Showreel";
 import Testimonials from "@/components/home/Testimonials";
 import { getProfile, getProjects, getServices, getTestimonials } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
@@ -27,9 +26,8 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero profile={profile} featured={featured[0] ?? null} />
+      <Hero profile={profile} featured={featured.find((p) => p.videoUrl) ?? featured[0] ?? null} />
       <FeaturedWork projects={featured} total={projects.length} />
-      <Showreel profile={profile} fallback={featured.find((p) => p.videoUrl) ?? null} />
       <ServicesPreview services={services} />
       <AboutPreview profile={profile} />
       <Testimonials items={testimonials} />

@@ -10,6 +10,8 @@ export const FRAME = {
   tall: "aspect-[4/5]",
 } as const;
 
+export const isVertical = (p: Pick<Project, "aspectRatio">) => p.aspectRatio === "9:16" || p.aspectRatio === "4:5";
+
 export function thumbnailOf(project: Project) {
   const v = parseVideo(project.videoUrl);
   return project.thumbnailUrl || project.posterUrl || (v.kind === "youtube" ? v.thumbnail : "");
@@ -29,8 +31,11 @@ export default function ProjectThumbnail({
 }) {
   const src = thumbnailOf(project);
   const isFile = /\.(mp4|webm|mov)(\?|$)/i.test(project.videoUrl);
+  // Reels and shorts get a portrait frame wherever they appear, so a 9:16 edit isn't cropped to a letterbox.
+  const vertical = isVertical(project);
+  const shape = vertical ? "tall" : frame;
   return (
-    <div className={`relative overflow-hidden rounded bg-media ${FRAME[frame]}`}>
+    <div className={`relative overflow-hidden rounded bg-media ${FRAME[shape]}`}>
       {src ? (
         <Img
           src={src}
@@ -41,11 +46,12 @@ export default function ProjectThumbnail({
           className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.025]"
         />
       ) : (
-        <PlaceholderFrame label="Placeholder · thumbnail to come" title={project.title} compact={frame === "tall"} />
+        <PlaceholderFrame label="Placeholder · thumbnail to come" title={project.title} compact={shape === "tall"} />
       )}
       {src && isFile && <HoverVideo src={project.videoUrl} />}
-      {project.duration && (
-        <span className="absolute bottom-3 right-3 rounded bg-black/70 px-2 py-1 font-mono text-[11px] tracking-wide text-white backdrop-blur-sm">
+      {(project.duration || vertical) && (
+        <span className="absolute bottom-3 right-3 flex items-center gap-2 rounded bg-black/70 px-2 py-1 font-mono text-[11px] tracking-wide text-white backdrop-blur-sm">
+          {vertical && <span className="text-white/70">{project.aspectRatio}</span>}
           {project.duration}
         </span>
       )}

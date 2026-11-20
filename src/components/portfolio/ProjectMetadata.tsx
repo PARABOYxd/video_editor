@@ -22,9 +22,17 @@ export default function ProjectMetadata({ project }: { project: Project }) {
         </div>
       ))}
       {project.software.length > 0 && (
-        <div className="flex justify-between gap-6 border-b border-line py-3.5">
-          <dt className="t-meta pt-0.5 text-secondary-aa">Software</dt>
-          <dd className="text-right text-[15px]">{project.software.join(", ")}</dd>
+        <div className="border-b border-line py-3.5">
+          <dt className="t-meta text-secondary-aa">Tools used</dt>
+          <dd className="mt-3">
+            <ul className="flex flex-wrap gap-2">
+              {project.software.map((s) => (
+                <li key={s} className="rounded border border-line bg-surface px-2.5 py-1 text-[13px] leading-5">
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </dd>
         </div>
       )}
     </dl>

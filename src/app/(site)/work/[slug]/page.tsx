@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import ContactCTA from "@/components/home/ContactCTA";
 import ProjectMetadata from "@/components/portfolio/ProjectMetadata";
 import RelatedProjects from "@/components/portfolio/RelatedProjects";
-import { thumbnailOf } from "@/components/portfolio/ProjectThumbnail";
+import { isVertical, thumbnailOf } from "@/components/portfolio/ProjectThumbnail";
 import Img from "@/components/ui/Img";
 import VideoPlayer from "@/components/ui/VideoPlayer";
 import { getProfile, getProjectBySlug, getProjects } from "@/lib/content";
@@ -35,7 +35,10 @@ export default async function ProjectPage({ params }: PageProps<"/work/[slug]">)
   const [project, profile, all] = await Promise.all([getProjectBySlug(slug), getProfile(), getProjects()]);
   if (!project) notFound();
 
-  const vertical = project.aspectRatio === "9:16" || project.aspectRatio === "4:5";
+  const vertical = isVertical(project);
+  const idx = all.findIndex((p) => p.id === project.id);
+  const nextProject = all.length > 1 ? all[(idx + 1) % all.length] : null;
+  const next = nextProject && nextProject.id !== project.id ? { href: `/work/${nextProject.slug}`, title: nextProject.title } : undefined;
   const story = (
     [
       ["Overview", project.description],
@@ -74,13 +77,13 @@ export default async function ProjectPage({ params }: PageProps<"/work/[slug]">)
         <div className="bg-media py-10 md:py-16">
           <div className="container-site">
             <div className="mx-auto w-full max-w-[420px]">
-              <VideoPlayer url={project.videoUrl} poster={project.posterUrl || thumbnailOf(project)} title={project.title} aspect={project.aspectRatio} priority sizes="420px" />
+              <VideoPlayer url={project.videoUrl} poster={project.posterUrl || thumbnailOf(project)} title={project.title} aspect={project.aspectRatio} priority sizes="420px" next={next} />
             </div>
           </div>
         </div>
       ) : (
         <div className="container-site">
-          <VideoPlayer url={project.videoUrl} poster={project.posterUrl || thumbnailOf(project)} title={project.title} aspect={project.aspectRatio} priority />
+          <VideoPlayer url={project.videoUrl} poster={project.posterUrl || thumbnailOf(project)} title={project.title} aspect={project.aspectRatio} priority next={next} />
         </div>
       )}
 

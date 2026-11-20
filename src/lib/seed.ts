@@ -115,7 +115,8 @@ export const seedProjects: {
     clientType: "Social media campaign",
     summary: "Thumb-stopping 9:16 vertical edits with word-by-word kinetic captions and punch zooms.",
     duration: "00:47",
-    aspectRatio: "9:16",
+    // The sample file is 1280x720; set 9:16 once a true vertical edit is uploaded.
+    aspectRatio: "16:9",
     year: "2026",
     featured: true,
     videoUrl: "/videos/credit-card-viral-reel.mp4",
