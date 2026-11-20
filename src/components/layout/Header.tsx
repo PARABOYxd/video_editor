@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Logo from "./Logo";
 
 const NAV = [
   { href: "/work", label: "Work" },
@@ -32,8 +33,8 @@ export default function Header({ name }: { name: string }) {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-paper">
       <div className="container-site flex h-[72px] items-center justify-between gap-8 md:h-20">
-        <Link href="/" className="font-display text-[17px] font-semibold uppercase tracking-[0.02em] [font-stretch:88%]">
-          {name}
+        <Link href="/" aria-label={`${name}, home`}>
+          <Logo />
         </Link>
 
         <nav aria-label="Main" className="hidden items-center gap-10 md:flex">

@@ -108,12 +108,15 @@ async function migrateAndSeed(db: Db) {
   for (const stmt of SCHEMA.split(";").map((s) => s.trim()).filter(Boolean)) {
     await db.query(stmt);
   }
-  const existing = await db.query("select 1 from settings where key = 'profile'");
-  if (existing.length) return;
 
-  await db.query("insert into settings (key, value) values ('profile', $1::jsonb) on conflict do nothing", [
+  await db.query("insert into settings (key, value) values ('profile', $1::jsonb) on conflict (key) do nothing", [
     JSON.stringify(seedProfile),
   ]);
+  // Rebrand: rename only if the profile still has the old default name (admin edits stay).
+  await db.query(
+    `update settings set value = value || '{"brandName":"Rytora Studio","shortName":"Rytora Studio"}'::jsonb
+     where key = 'profile' and value->>'brandName' = 'Rishab Jain & Kunal Gophane'`
+  );
   for (const [i, name] of seedCategories.entries()) {
     await db.query("insert into categories (name, slug, sort) values ($1, $2, $3) on conflict (slug) do nothing", [
       name,
@@ -121,18 +124,30 @@ async function migrateAndSeed(db: Db) {
       i,
     ]);
   }
-  for (const [i, sv] of seedServices.entries()) {
-    await db.query(
-      "insert into services (title, description, deliverables, ideal_for, process, sort) values ($1, $2, $3, $4, $5, $6)",
-      [sv.title, sv.description, sv.deliverables, sv.idealFor, sv.process, i]
-    );
+  // Earlier boots re-inserted the seed services on every start; drop those exact duplicates.
+  await db.query(
+    `delete from services s using services d
+     where s.id > d.id and s.title = d.title and s.description = d.description`
+  );
+  // services has no unique column, so "on conflict" can't dedupe. Only seed into an empty table.
+  const hasServices = await db.query("select 1 from services limit 1");
+  if (!hasServices.length) {
+    for (const [i, sv] of seedServices.entries()) {
+      await db.query(
+        "insert into services (title, description, deliverables, ideal_for, process, sort) values ($1, $2, $3, $4, $5, $6)",
+        [sv.title, sv.description, sv.deliverables, sv.idealFor, sv.process, i]
+      );
+    }
   }
   for (const [i, p] of seedProjects.entries()) {
     await db.query(
-      `insert into projects (slug, title, category_id, client_type, summary, description, duration, aspect_ratio, year, featured, is_sample, sort)
-       values ($1, $2, (select id from categories where slug = $3), $4, $5, $6, $7, $8, $9, $10, true, $11)
-       on conflict (slug) do nothing`,
-      [p.slug, p.title, slugify(p.category), p.clientType, p.summary, seedProjectDescription, p.duration, p.aspectRatio, p.year, p.featured, i]
+      `insert into projects (slug, title, category_id, client_type, summary, description, duration, aspect_ratio, year, featured, is_sample, sort, video_url, thumbnail_url, poster_url)
+       values ($1, $2, (select id from categories where slug = $3), $4, $5, $6, $7, $8, $9, $10, true, $11, $12, $13, $14)
+       on conflict (slug) do update set
+         video_url = coalesce(nullif(projects.video_url, ''), excluded.video_url),
+         thumbnail_url = coalesce(nullif(projects.thumbnail_url, ''), excluded.thumbnail_url),
+         poster_url = coalesce(nullif(projects.poster_url, ''), excluded.poster_url)`,
+      [p.slug, p.title, slugify(p.category), p.clientType, p.summary, seedProjectDescription, p.duration, p.aspectRatio, p.year, p.featured, i, p.videoUrl, p.thumbnailUrl, p.posterUrl]
     );
   }
 }

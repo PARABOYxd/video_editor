@@ -17,7 +17,7 @@ export default function ServicesPreview({ services }: { services: Service[] }) {
         }
       />
       <ol className="mt-14 border-t border-ink">
-        {services.map((s, i) => (
+        {services.slice(0, 4).map((s, i) => (
           <li key={s.id} className="grid-12 gap-y-2 border-b border-line py-6 md:py-8">
             <span className="t-meta col-span-12 pt-2 text-secondary-aa md:col-span-1">{String(i + 1).padStart(2, "0")}</span>
             <h3 className="col-span-12 font-display text-[22px] font-semibold uppercase leading-tight [font-stretch:88%] md:col-span-5 md:text-[28px]">
@@ -27,6 +27,13 @@ export default function ServicesPreview({ services }: { services: Service[] }) {
           </li>
         ))}
       </ol>
+      {services.length > 4 && (
+        <div className="mt-10 flex justify-center">
+          <Link href="/services" className="btn btn-primary">
+            View all {services.length} services <span className="arrow" aria-hidden>→</span>
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

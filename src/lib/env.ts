@@ -34,6 +34,8 @@ export const env = {
   databaseUrl: str(process.env.DATABASE_URL ?? process.env.POSTGRES_URL),
   /** Vercel Blob token, for thumbnail uploads. */
   blobToken: str(process.env.BLOB_READ_WRITE_TOKEN),
+  /** Public URL of the folder holding the videos (e.g. a Cloudflare R2 bucket). Replaces local "/videos/…" paths. */
+  mediaBaseUrl: str(process.env.MEDIA_BASE_URL).replace(/\/+$/, ""),
 
   /** Admin login. The password is stored only as a scrypt hash (pnpm admin:hash). */
   adminEmail: str(process.env.ADMIN_EMAIL).toLowerCase(),

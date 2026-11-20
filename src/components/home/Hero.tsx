@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Play } from "lucide-react";
 import Img from "../ui/Img";
 import PlaceholderFrame from "../ui/PlaceholderFrame";
+import HoverVideo from "../ui/HoverVideo";
 import { thumbnailOf } from "../portfolio/ProjectThumbnail";
 import type { Profile, Project } from "@/lib/types";
 
@@ -57,6 +58,7 @@ export default function Hero({ profile, featured }: { profile: Profile; featured
           ) : (
             <PlaceholderFrame label="Placeholder · add a showreel still in the admin" />
           )}
+          {/\.(mp4|webm|mov)(\?|$)/i.test(profile.showreelUrl) && <HoverVideo src={profile.showreelUrl} mode="auto" />}
           <span className="absolute bottom-5 left-5 flex items-center gap-3 rounded bg-white py-2.5 pl-3.5 pr-4 text-[12px] font-medium uppercase tracking-[0.08em] text-ink transition-colors duration-200 group-hover:bg-accent group-hover:text-white md:bottom-7 md:left-7">
             <Play className="h-3.5 w-3.5 fill-current" aria-hidden /> Watch the reel
           </span>

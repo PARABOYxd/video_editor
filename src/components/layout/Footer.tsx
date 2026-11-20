@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Profile } from "@/lib/types";
+import Logo from "./Logo";
 
 const NAV = [
   { href: "/", label: "Home" },
@@ -7,6 +8,7 @@ const NAV = [
   { href: "/about", label: "About" },
   { href: "/services", label: "Services" },
   { href: "/contact", label: "Contact" },
+  { href: "/videos-overview.html", label: "Video Showcase ↗" },
 ];
 
 export default function Footer({ profile }: { profile: Profile }) {
@@ -14,7 +16,7 @@ export default function Footer({ profile }: { profile: Profile }) {
     <footer className="border-t border-line">
       <div className="container-site grid-12 gap-y-10 py-16">
         <div className="col-span-12 md:col-span-5">
-          <p className="font-display text-[22px] font-semibold uppercase [font-stretch:88%]">{profile.shortName}</p>
+          <Logo size="lg" />
           <p className="mt-3 max-w-sm text-[15px] text-secondary-aa">{profile.footerBlurb}</p>
         </div>
 

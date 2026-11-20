@@ -33,7 +33,7 @@ export const viewport: Viewport = { themeColor: "#f5f3ee" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${dmSans.variable} ${plexMono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${archivo.variable} ${dmSans.variable} ${plexMono.variable}`}>
       <body className="min-h-dvh">{children}</body>
     </html>
   );

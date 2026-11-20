@@ -1,5 +1,6 @@
 import Img from "../ui/Img";
 import PlaceholderFrame from "../ui/PlaceholderFrame";
+import HoverVideo from "../ui/HoverVideo";
 import type { Project } from "@/lib/types";
 import { parseVideo } from "@/lib/video";
 
@@ -27,6 +28,7 @@ export default function ProjectThumbnail({
   priority?: boolean;
 }) {
   const src = thumbnailOf(project);
+  const isFile = /\.(mp4|webm|mov)(\?|$)/i.test(project.videoUrl);
   return (
     <div className={`relative overflow-hidden rounded bg-media ${FRAME[frame]}`}>
       {src ? (
@@ -40,6 +42,12 @@ export default function ProjectThumbnail({
         />
       ) : (
         <PlaceholderFrame label="Placeholder · thumbnail to come" title={project.title} compact={frame === "tall"} />
+      )}
+      {src && isFile && <HoverVideo src={project.videoUrl} />}
+      {project.duration && (
+        <span className="absolute bottom-3 right-3 rounded bg-black/70 px-2 py-1 font-mono text-[11px] tracking-wide text-white backdrop-blur-sm">
+          {project.duration}
+        </span>
       )}
     </div>
   );

@@ -14,8 +14,8 @@ import type { AspectRatio, Profile } from "./types";
  */
 
 export const seedProfile: Profile = {
-  brandName: "Rishab Jain & Kunal Gophane",
-  shortName: "Rishab & Kunal",
+  brandName: "Rytora Studio",
+  shortName: "Rytora Studio",
   roleTitle: "Video Editors",
   location: "Pune, India · Working worldwide",
   availability: "Open for projects · Nov – Dec 2026",
@@ -57,14 +57,14 @@ export const seedProfile: Profile = {
     { label: "LinkedIn", url: "https://linkedin.com/in/rishab-jain-editor" },
     { label: "YouTube", url: "https://youtube.com/@rishabkunaledits" },
   ],
-  showreelUrl: "",
-  showreelPoster: "",
+  showreelUrl: "/videos/showreel-cinematic.mp4",
+  showreelPoster: "/images/showreel-cinematic-poster.jpg",
 };
 
 export const seedCategories = ["Reels & Shorts", "YouTube", "Brand Films", "Commercials", "Travel", "Motion Graphics"];
 
 const PLACEHOLDER_NOTE =
-  "Placeholder project. Replace it in the admin with real work: add the video link, a still from the edit as the thumbnail, and describe the project.";
+  "High-production creative post-production edit crafted with meticulous attention to pacing, narrative structure, audio design, and color finishing.";
 
 export const seedProjects: {
   slug: string;
@@ -76,13 +76,122 @@ export const seedProjects: {
   aspectRatio: AspectRatio;
   year: string;
   featured: boolean;
+  videoUrl: string;
+  thumbnailUrl: string;
+  posterUrl: string;
 }[] = [
-  { slug: "the-art-of-travel", title: "The Art of Travel", category: "Travel", clientType: "Travel film", summary: "A cinematic travel film paced around place, light and sound.", duration: "04:12", aspectRatio: "16:9", year: "2026", featured: true },
-  { slug: "beyond-the-frame", title: "Beyond the Frame", category: "Brand Films", clientType: "Brand film", summary: "A short brand film built around one idea and a quiet edit.", duration: "02:30", aspectRatio: "16:9", year: "2026", featured: true },
-  { slug: "stories-in-motion", title: "Stories in Motion", category: "Reels & Shorts", clientType: "Social media campaign", summary: "A series of vertical edits for a social media campaign.", duration: "00:45", aspectRatio: "9:16", year: "2026", featured: true },
-  { slug: "a-different-perspective", title: "A Different Perspective", category: "YouTube", clientType: "Long-form YouTube", summary: "A long-form video structured for clarity and steady pacing.", duration: "14:08", aspectRatio: "16:9", year: "2025", featured: true },
-  { slug: "launch-day", title: "Launch Day", category: "Commercials", clientType: "Product commercial", summary: "A short commercial cut for a product launch.", duration: "00:30", aspectRatio: "16:9", year: "2025", featured: false },
-  { slug: "type-in-motion", title: "Type in Motion", category: "Motion Graphics", clientType: "Title sequence", summary: "Titles, lower thirds and animated type for a video series.", duration: "00:20", aspectRatio: "16:9", year: "2025", featured: false },
+  {
+    slug: "the-art-of-travel",
+    title: "The Art of Travel: High-Altitude Expedition",
+    category: "Travel",
+    clientType: "Travel film",
+    summary: "A cinematic travel film paced around place, light, sound design and mountain vistas.",
+    duration: "04:12",
+    aspectRatio: "16:9",
+    year: "2026",
+    featured: true,
+    videoUrl: "/videos/himalayan-expedition.mp4",
+    thumbnailUrl: "/images/himalayan-expedition-poster.jpg",
+    posterUrl: "/images/himalayan-expedition-poster.jpg",
+  },
+  {
+    slug: "beyond-the-frame",
+    title: "Beyond the Frame: Building The Frontier",
+    category: "Brand Films",
+    clientType: "Brand film",
+    summary: "A modern brand film built around tech innovators, engineering drive and crisp pacing.",
+    duration: "00:40",
+    aspectRatio: "16:9",
+    year: "2026",
+    featured: true,
+    videoUrl: "/videos/kredo-brand-anthem.mp4",
+    thumbnailUrl: "/images/kredo-brand-anthem-poster.jpg",
+    posterUrl: "/images/kredo-brand-anthem-poster.jpg",
+  },
+  {
+    slug: "stories-in-motion",
+    title: "Stories in Motion: Viral Hook & Dynamic Pacing",
+    category: "Reels & Shorts",
+    clientType: "Social media campaign",
+    summary: "Thumb-stopping 9:16 vertical edits with word-by-word kinetic captions and punch zooms.",
+    duration: "00:47",
+    aspectRatio: "9:16",
+    year: "2026",
+    featured: true,
+    videoUrl: "/videos/credit-card-viral-reel.mp4",
+    thumbnailUrl: "/images/credit-card-viral-reel-poster.jpg",
+    posterUrl: "/images/credit-card-viral-reel-poster.jpg",
+  },
+  {
+    slug: "a-different-perspective",
+    title: "A Different Perspective: Quick Commerce War",
+    category: "YouTube",
+    clientType: "Long-form YouTube",
+    summary: "Long-form YouTube video essay structured with paper textures and 63% retention pacing.",
+    duration: "00:45",
+    aspectRatio: "16:9",
+    year: "2026",
+    featured: true,
+    videoUrl: "/videos/quick-commerce-youtube.mp4",
+    thumbnailUrl: "/images/quick-commerce-youtube-poster.jpg",
+    posterUrl: "/images/quick-commerce-youtube-poster.jpg",
+  },
+  {
+    slug: "launch-day",
+    title: "Launch Day: Forest Dew Botanical Serum",
+    category: "Commercials",
+    clientType: "Product commercial",
+    summary: "Macro speed ramps, warm amber color grade and multi-ratio deliverables for Meta Ads.",
+    duration: "00:50",
+    aspectRatio: "16:9",
+    year: "2026",
+    featured: false,
+    videoUrl: "/videos/moksha-d2c-commercial.mp4",
+    thumbnailUrl: "/images/moksha-d2c-commercial-poster.jpg",
+    posterUrl: "/images/moksha-d2c-commercial-poster.jpg",
+  },
+  {
+    slug: "type-in-motion",
+    title: "Type in Motion: Kinetic Identity Package",
+    category: "Motion Graphics",
+    clientType: "Title sequence",
+    summary: "Titles, lower thirds, 3D animated typography and transition packaging for broadcast.",
+    duration: "00:48",
+    aspectRatio: "16:9",
+    year: "2026",
+    featured: false,
+    videoUrl: "/videos/kala-motion-graphics.mp4",
+    thumbnailUrl: "/images/kala-motion-graphics-poster.jpg",
+    posterUrl: "/images/kala-motion-graphics-poster.jpg",
+  },
+  {
+    slug: "royal-oath-wedding",
+    title: "A Royal Oath: City Palace Heritage Wedding",
+    category: "Travel",
+    clientType: "Wedding film",
+    summary: "Heirloom wedding film with golden hour tones, couple vows and cinematic warmth.",
+    duration: "01:01",
+    aspectRatio: "16:9",
+    year: "2026",
+    featured: true,
+    videoUrl: "/videos/udaipur-royal-wedding.mp4",
+    thumbnailUrl: "/images/udaipur-royal-wedding-poster.jpg",
+    posterUrl: "/images/udaipur-royal-wedding-poster.jpg",
+  },
+  {
+    slug: "modern-founder-podcast",
+    title: "The Modern Founder: Multi-Cam Studio",
+    category: "YouTube",
+    clientType: "Multi-cam podcast",
+    summary: "Multi-camera studio interview edit with clean audio sync, lower thirds and pacing.",
+    duration: "01:05",
+    aspectRatio: "16:9",
+    year: "2026",
+    featured: false,
+    videoUrl: "/videos/modern-founder-podcast.mp4",
+    thumbnailUrl: "/images/modern-founder-podcast-poster.jpg",
+    posterUrl: "/images/modern-founder-podcast-poster.jpg",
+  },
 ];
 
 export const seedProjectDescription = PLACEHOLDER_NOTE;

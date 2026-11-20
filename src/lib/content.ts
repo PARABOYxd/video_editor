@@ -1,6 +1,10 @@
 import "server-only";
 import { cache } from "react";
 import { getDb, slugify, type Row } from "./db";
+import { env } from "./env";
+
+/** Local "/videos/x.mp4" → "<MEDIA_BASE_URL>/x.mp4" when videos are hosted on Cloudflare R2. */
+const media = (url: string) => (env.mediaBaseUrl && url.startsWith("/videos/") ? env.mediaBaseUrl + url.slice("/videos".length) : url);
 import { seedCategories, seedProfile, seedProjectDescription, seedProjects, seedServices } from "./seed";
 import { ASPECT_RATIOS, type AspectRatio, type Category, type Inquiry, type Profile, type Project, type Service, type Testimonial } from "./types";
 
@@ -15,6 +19,7 @@ const list = (v: unknown): string[] => {
 const ratio = (v: unknown): AspectRatio => (ASPECT_RATIOS as readonly string[]).includes(String(v)) ? (v as AspectRatio) : "16:9";
 
 function toProject(r: Row): Project {
+  const seed = seedProjects.find((p) => p.slug === r.slug);
   return {
     id: Number(r.id),
     slug: String(r.slug),
@@ -24,20 +29,20 @@ function toProject(r: Row): Project {
     categorySlug: (r.category_slug as string) ?? null,
     client: text(r.client),
     clientType: text(r.client_type),
-    summary: text(r.summary),
+    summary: text(r.summary) || (seed?.summary ?? ""),
     description: text(r.description),
     background: text(r.background),
     objective: text(r.objective),
     approach: text(r.approach),
     role: text(r.role),
     software: list(r.software),
-    duration: text(r.duration),
-    videoUrl: text(r.video_url),
-    posterUrl: text(r.poster_url),
-    thumbnailUrl: text(r.thumbnail_url),
-    aspectRatio: ratio(r.aspect_ratio),
+    duration: text(r.duration) || (seed?.duration ?? "02:30"),
+    videoUrl: media(text(r.video_url) || (seed?.videoUrl ?? "")),
+    posterUrl: text(r.poster_url) || (seed?.posterUrl ?? ""),
+    thumbnailUrl: text(r.thumbnail_url) || (seed?.thumbnailUrl ?? ""),
+    aspectRatio: ratio(r.aspect_ratio || seed?.aspectRatio),
     gallery: list(r.gallery),
-    year: String(r.year ?? ""),
+    year: String(r.year ?? seed?.year ?? "2026"),
     featured: Boolean(r.featured),
     published: Boolean(r.published),
     isSample: Boolean(r.is_sample),
@@ -68,9 +73,9 @@ const seedProjectList: Project[] = seedProjects.map((p, i) => {
     role: "",
     software: [],
     duration: p.duration,
-    videoUrl: "",
-    posterUrl: "",
-    thumbnailUrl: "",
+    videoUrl: media(p.videoUrl),
+    posterUrl: p.posterUrl,
+    thumbnailUrl: p.thumbnailUrl,
     aspectRatio: p.aspectRatio,
     gallery: [],
     year: p.year,
@@ -90,10 +95,15 @@ const PROJECT_SELECT = `
 
 export const getProfile = cache(async (): Promise<Profile> => {
   const db = await getDb();
-  if (!db) return seedProfile;
+  if (!db) return { ...seedProfile, showreelUrl: media(seedProfile.showreelUrl) };
   const rows = await db.query<{ value: Profile }>("select value from settings where key = 'profile'");
-  // Merge over the seed so fields added later always exist.
-  return { ...seedProfile, ...(rows[0]?.value ?? {}) };
+  const val = rows[0]?.value ?? {};
+  return {
+    ...seedProfile,
+    ...val,
+    showreelUrl: media(val.showreelUrl || seedProfile.showreelUrl),
+    showreelPoster: val.showreelPoster || seedProfile.showreelPoster,
+  };
 });
 
 export const getCategories = cache(async (): Promise<Category[]> => {
@@ -108,21 +118,30 @@ export const getProjects = cache(async (): Promise<Project[]> => {
   const db = await getDb();
   if (!db) return seedProjectList;
   const rows = await db.query(`${PROJECT_SELECT} where p.published order by p.sort, p.created_at desc`);
-  return rows.map(toProject);
+  const projects = rows.map(toProject);
+  for (const sp of seedProjectList) {
+    if (!projects.some((p) => p.slug === sp.slug)) {
+      projects.push(sp);
+    }
+  }
+  return projects;
 });
 
 export const getProjectBySlug = cache(async (slug: string): Promise<Project | null> => {
   const db = await getDb();
   if (!db) return seedProjectList.find((p) => p.slug === slug) ?? null;
   const rows = await db.query(`${PROJECT_SELECT} where p.slug = $1 and p.published`, [slug]);
-  return rows[0] ? toProject(rows[0]) : null;
+  if (rows[0]) return toProject(rows[0]);
+  return seedProjectList.find((p) => p.slug === slug) ?? null;
 });
 
 export const getServices = cache(async (): Promise<Service[]> => {
   const db = await getDb();
   if (!db) return seedServices.map((sv, i) => ({ id: i + 1, ...sv, sort: i }));
   const rows = await db.query("select * from services order by sort, id");
-  return rows.map((r) => ({
+  // Guard against repeated seed rows: show each service title once.
+  const unique = rows.filter((r, i) => rows.findIndex((x) => x.title === r.title) === i);
+  return unique.map((r) => ({
     id: Number(r.id),
     title: text(r.title),
     description: text(r.description),

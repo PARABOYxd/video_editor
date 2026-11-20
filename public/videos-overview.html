@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Assets Overview · Rishab Jain & Kunal Gophane Portfolio</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #08080a;
+      color: #e4e4e7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      padding: 36px 24px 80px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+    header {
+      border-bottom: 1px solid #1a1a24;
+      padding-bottom: 24px;
+      margin-bottom: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(249, 115, 22, 0.12);
+      border: 1px solid rgba(249, 115, 22, 0.35);
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #f97316;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 30px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+    }
+    h1 span {
+      color: #f97316;
+    }
+    p.subtitle {
+      color: #94949e;
+      font-size: 14px;
+      margin-top: 6px;
+    }
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: #14141c;
+      border: 1px solid #282836;
+      border-radius: 8px;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .action-btn:hover {
+      background: #f97316;
+      color: #08080a;
+      border-color: #f97316;
+    }
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+      align-items: center;
+    }
+    .filter-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #71717a;
+      margin-right: 6px;
+      font-weight: 600;
+    }
+    .filter-btn {
+      background: #121218;
+      border: 1px solid #22222e;
+      color: #a1a1aa;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: #f97316;
+      color: #08080a;
+      border-color: #f97316;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(390px, 1fr));
+      gap: 28px;
+    }
+    .card {
+      background: #0f0f15;
+      border: 1px solid #1f1f2b;
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover {
+      border-color: rgba(249, 115, 22, 0.5);
+      transform: translateY(-2px);
+    }
+    .video-wrapper {
+      position: relative;
+      background: #000000;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .card.portrait .video-wrapper {
+      aspect-ratio: 9 / 16;
+      max-height: 480px;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .card.portrait video {
+      object-fit: contain;
+      background: #050507;
+    }
+    .card-body {
+      padding: 18px 20px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #f97316;
+      background: rgba(249, 115, 22, 0.1);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .duration {
+      font-size: 12px;
+      color: #71717a;
+      font-family: monospace;
+      font-weight: 600;
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: #94949e;
+      margin-bottom: 14px;
+      flex: 1;
+      line-height: 1.45;
+    }
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      padding-top: 12px;
+      border-top: 1px solid #1a1a24;
+      font-size: 11px;
+      color: #71717a;
+    }
+    .specs strong {
+      color: #d4d4d8;
+    }
+    .file-path {
+      grid-column: span 2;
+      font-family: monospace;
+      color: #f97316;
+      word-break: break-all;
+      background: #08080a;
+      padding: 5px 8px;
+      border-radius: 4px;
+      border: 1px solid #1b1b26;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <span class="badge">Portfolio Video Bank · Real Edits</span>
+        <h1>Rishab & Kunal · <span>Finished Video Edits</span></h1>
+        <p class="subtitle">Real video editing portfolio cuts with actual sound design, kinetic captions, rhythm, and color grading.</p>
+      </div>
+      <div class="nav-actions">
+        <a href="/" class="action-btn">← Back to Portfolio Website</a>
+        <a href="/work" class="action-btn">Browse Projects Archive →</a>
+      </div>
+    </header>
+
+    <div class="filter-bar">
+      <span class="filter-label">Filter:</span>
+      <button class="filter-btn active" data-filter="all">All Videos (9)</button>
+      <button class="filter-btn" data-filter="showreel">Showreel</button>
+      <button class="filter-btn" data-filter="commercial">Commercial / D2C</button>
+      <button class="filter-btn" data-filter="reels">Viral Reel (9:16)</button>
+      <button class="filter-btn" data-filter="youtube">YouTube Explainer</button>
+      <button class="filter-btn" data-filter="wedding">Wedding Teaser</button>
+      <button class="filter-btn" data-filter="brand">Brand Film</button>
+      <button class="filter-btn" data-filter="podcast">Podcast Multi-Cam</button>
+      <button class="filter-btn" data-filter="motion">Motion Graphics</button>
+    </div>
+
+    <div class="grid">
+
+      <!-- 1. Master Showreel -->
+      <div class="card" data-category="showreel">
+        <div class="video-wrapper">
+          <video controls preload="metadata" poster="/images/showreel-cinematic-poster.jpg">
+            <source src="/videos/showreel-cinematic.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="tag">Master Showreel</span>
+            <span class="duration">00:40</span>
+          </div>
+          <h2 class="card-title">Commercial & Narrative Editing Showreel</h2>
+          <p class="card-desc">High-tempo master portfolio showreel featuring fast-paced cuts, sound foley design, match cuts, and dynamic color grading across commercial and narrative work.</p>
+          <div class="specs">
+            <div>Format: <strong>1080p MP4 / AAC</strong></div>
+            <div>Aspect: <strong>16:9 Landscape</strong></div>
+            <div>File Size: <strong>9.0 MB</strong></div>
+            <div>Role: <strong>Lead Editors</strong></div>
+            <div class="file-path">/videos/showreel-cinematic.mp4</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Instagram Viral Reel -->
+      <div class="card portrait" data-category="reels">
+        <div class="video-wrapper">
+          <video controls preload="metadata" poster="/images/credit-card-viral-reel-poster.jpg">
+            <source src="/videos/credit-card-viral-reel.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="tag">Viral Reel (9:16)</span>
+            <span class="duration">00:47</span>
+          </div>
+          <h2 class="card-title">Short-Form Reel Edit with Kinetic Captions</h2>
+          <p class="card-desc">Authentic short-form vertical cut with dynamic word-by-word highlighted captions, zoom punches, pop-up motion graphics, and audio sound effects.</p>
+          <div class="specs">
+            <div>Format: <strong>1080x1920 MP4</strong></div>
+            <div>Aspect: <strong>9:16 Vertical</strong></div>
+            <div>File Size: <strong>5.4 MB</strong></div>
+            <div>Niche: <strong>Social Retention</strong></div>
+            <div class="file-path">/videos/credit-card-viral-reel.mp4</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. D2C Commercial Ad -->
+      <div class="card" data-category="commercial">
+        <div class="video-wrapper">
+          <video controls preload="metadata" poster="/images/moksha-d2c-commercial-poster.jpg">
+            <source src="/videos/moksha-d2c-commercial.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="tag">Commercial / D2C</span>
+            <span class="duration">00:50</span>
+          </div>
+          <h2 class="card-title">Commercial Product Ad Showcase</h2>
+          <p class="card-desc">Polished commercial edit with rhythmic cuts synced to beats, macro texture grading, sound design drops, and high-conversion pacing for lifestyle brands.</p>
+          <div class="specs">
+            <div>Format: <strong>1080p MP4 / AAC</strong></div>
+            <div>Aspect: <strong>16:9 Landscape</strong></div>
+            <div>File Size: <strong>4.6 MB</strong></div>
+            <div>Style: <strong>Commercial Ad</strong></div>
+            <div class="file-path">/videos/moksha-d2c-commercial.mp4</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. YouTube Video Essay -->
+      <div class="card" data-category="youtube">
+        <div class="video-wrapper">
+          <video controls preload="metadata" poster="/images/quick-commerce-youtube-poster.jpg">
+            <source src="/videos/quick-commerce-youtube.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="tag">YouTube Video Essay</span>
+            <span class="duration">00:45</span>
+          </div>
+          <h2 class="card-title">Documentary Retention Edit (Magnates Style)</h2>
+          <p class="card-desc">Retention-focused YouTube essay with paper cutouts, historical archive animation, sound layers, and pacing designed to hold high audience retention.</p>
+          <div class="specs">
+            <div>Format: <strong>1080p MP4 / AAC</strong></div>
+            <div>Aspect: <strong>16:9 Landscape</strong></div>
+            <div>File Size: <strong>16.5 MB</strong></div>
+            <div>Style: <strong>YouTube Long-Form</strong></div>
+            <div class="file-path">/videos/quick-commerce-youtube.mp4</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Royal Wedding Teaser -->
+      <div class="card" data-category="wedding">
+        <div class="video-wrapper">
+          <video controls preload="metadata" poster="/images/udaipur-royal-wedding-poster.jpg">
+            <source src="/videos/udaipur-royal-wedding.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="tag">Wedding Film</span>
+            <span class="duration">01:01</span>
+          </div>
+          <h2 class="card-title">Cinematic Royal Wedding Teaser</h2>
+          <p class="card-desc">Authentic cinematic Indian wedding highlight film with emotional musical score, audio vows integration, rich color tones, and seamless slow-motion transitions.</p>
+          <div class="specs">
+            <div>Format: <strong>1080p MP4 / AAC</strong></div>
+            <div>Aspect: <strong>16:9 Landscape</strong></div>
+            <div>File Size: <strong>26.4 MB</strong></div>
+            <div>Style: <strong>Cinematic Teaser</strong></div>
+            <div class="file-path">/videos/udaipur-royal-wedding.mp4</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Brand Anthem Film -->
+      <div class="card" data-category="brand">
+        <div class="video-wrapper">
+          <video controls preload="metadata" poster="/images/kredo-brand-anthem-poster.jpg">
+            <source src="/videos/kredo-brand-anthem.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="tag">Brand Anthem</span>
+            <span class="duration">00:40</span>
+          </div>
+          <h2 class="card-title">Cinematic Campaign & Brand Anthem</h2>
+          <p class="card-desc">High-production value campaign film shot on Blackmagic 6K Pro, edited with atmospheric pacing, professional voiceover, and inspiring score.</p>
+          <div class="specs">
+            <div>Format: <strong>1080p MP4 / AAC</strong></div>
+            <div>Aspect: <strong>16:9 Landscape</strong></div>
+            <div>File Size: <strong>19.2 MB</strong></div>
+            <div>Client: <strong>Outdoor Campaign</strong></div>
+            <div class="file-path">/videos/kredo-brand-anthem.mp4</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Multi-Cam Podcast Studio -->
+      <div class="card" data-category="podcast">
+        <div class="video-wrapper">
+          <video controls preload="metadata" poster="/images/modern-founder-podcast-poster.jpg">
+            <source src="/videos/modern-founder-podcast.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="tag">Podcast Multi-Cam</span>
+            <span class="duration">01:05</span>
+          </div>
+          <h2 class="card-title">Multi-Camera Studio Podcast Cut</h2>
+          <p class="card-desc">Real multi-angle studio cut with dialogue-driven switching, lower thirds, speech audio equalization, and retention chapter highlights.</p>
+          <div class="specs">
+            <div>Format: <strong>1080p MP4 / AAC</strong></div>
+            <div>Aspect: <strong>16:9 Landscape</strong></div>
+            <div>File Size: <strong>13.9 MB</strong></div>
+            <div>Style: <strong>Studio Multi-Cam</strong></div>
+            <div class="file-path">/videos/modern-founder-podcast.mp4</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. Motion Graphics & Kinetic Showreel -->
+      <div class="card" data-category="motion">
+        <div class="video-wrapper">
+          <video controls preload="metadata" poster="/images/kala-motion-graphics-poster.jpg">
+            <source src="/videos/kala-motion-graphics.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="tag">Motion Graphics</span>
+            <span class="duration">00:48</span>
+          </div>
+          <h2 class="card-title">Motion Design & Kinetic Typography Reel</h2>
+          <p class="card-desc">Creative kinetic typography, 3D element rendering, logo packaging, and slick graphic transitions with punchy electronic sound design.</p>
+          <div class="specs">
+            <div>Format: <strong>1080p MP4 / AAC</strong></div>
+            <div>Aspect: <strong>16:9 Landscape</strong></div>
+            <div>File Size: <strong>11.8 MB</strong></div>
+            <div>Style: <strong>Motion & 3D</strong></div>
+            <div class="file-path">/videos/kala-motion-graphics.mp4</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. Himalayan Travel Documentary -->
+      <div class="card" data-category="youtube">
+        <div class="video-wrapper">
+          <video controls preload="metadata" poster="/images/himalayan-expedition-poster.jpg">
+            <source src="/videos/himalayan-expedition.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="card-body">
+          <div class="card-meta">
+            <span class="tag">Documentary Reel</span>
+            <span class="duration">01:05</span>
+          </div>
+          <h2 class="card-title">Cinematic Travel & Documentary Reel</h2>
+          <p class="card-desc">Atmospheric expedition editing featuring sound foley, sweeping landscape grading, and storytelling rhythm produced by Millstream Productions.</p>
+          <div class="specs">
+            <div>Format: <strong>1080p MP4 / AAC</strong></div>
+            <div>Aspect: <strong>16:9 Landscape</strong></div>
+            <div>File Size: <strong>20.6 MB</strong></div>
+            <div>Style: <strong>Travel / Documentary</strong></div>
+            <div class="file-path">/videos/himalayan-expedition.mp4</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const buttons = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.card');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.getAttribute('data-filter');
+
+        cards.forEach(card => {
+          if (filter === 'all' || card.getAttribute('data-category') === filter) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
