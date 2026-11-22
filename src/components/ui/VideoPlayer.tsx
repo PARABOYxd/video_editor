@@ -2,21 +2,23 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Loader2, Maximize, Minimize, Pause, Play, RotateCcw, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, Captions, Loader2, Maximize, Minimize, Pause, Play, RotateCcw, Volume2, VolumeX } from "lucide-react";
 import Img from "./Img";
 import PlaceholderFrame from "./PlaceholderFrame";
 import { parseVideo } from "@/lib/video";
+import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
 
 const PLAY_EVENT = "ve:play";
 const HIDE_AFTER = 2500;
 const DOUBLE_TAP = 280;
 const ASPECT: Record<string, string> = {
   "16:9": "aspect-video",
-  "21:9": "aspect-[21/9]",
-  "4:3": "aspect-[4/3]",
+  "21:9": "aspect-ultrawide",
+  "4:3": "aspect-classic",
   "1:1": "aspect-square",
-  "4:5": "aspect-[4/5]",
-  "9:16": "aspect-[9/16]",
+  "4:5": "aspect-portrait",
+  "9:16": "aspect-reel",
 };
 const RATIO: Record<string, number> = { "16:9": 16 / 9, "21:9": 21 / 9, "4:3": 4 / 3, "1:1": 1, "4:5": 4 / 5, "9:16": 9 / 16 };
 
@@ -39,6 +41,8 @@ type Props = {
   title: string;
   aspect?: string;
   priority?: boolean;
+  /** WebVTT captions for file videos. */
+  captions?: string;
   /** Label shown when there is no video yet. */
   emptyLabel?: string;
   sizes?: string;
@@ -65,6 +69,7 @@ export default function VideoPlayer({
   title,
   aspect = "16:9",
   priority = false,
+  captions = "",
   emptyLabel = "Video coming soon",
   sizes = "(min-width: 1408px) 1280px, 100vw",
   autoStart = false,
@@ -85,6 +90,7 @@ export default function VideoPlayer({
   const [waiting, setWaiting] = useState(false);
   const [ended, setEnded] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [captioned, setCaptioned] = useState(true);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [buffered, setBuffered] = useState(0);
@@ -136,6 +142,16 @@ export default function VideoPlayer({
       if (err?.name === "NotAllowedError") setStarted(false);
     });
   }, [started, source.kind, id]);
+
+  // Opened by a click on a button that has gone: take the focus, so the shortcuts work.
+  useEffect(() => {
+    if (autoStart) wrap.current?.focus({ preventScroll: true });
+  }, [autoStart]);
+
+  useEffect(() => {
+    const track = wrap.current?.querySelector("track")?.track;
+    if (track) track.mode = captioned ? "showing" : "hidden";
+  }, [captioned, started]);
 
   // Controls: always visible while paused; fade out after a moment of playback.
   const poke = useCallback(() => {
@@ -204,6 +220,8 @@ export default function VideoPlayer({
   const onKey = (e: React.KeyboardEvent) => {
     if (source.kind !== "file" || !started) return;
     poke();
+    // Space on a button presses that button.
+    if ((e.target as HTMLElement).tagName === "BUTTON" && e.key === " ") return;
     if ((e.target as HTMLElement).tagName === "INPUT" && e.key !== " " && e.key !== "k") return; // the slider handles arrows
     if (e.key === " " || e.key === "k") {
       e.preventDefault();
@@ -232,13 +250,13 @@ export default function VideoPlayer({
   };
 
   const posterLayer = image ? (
-    <Img src={image} alt={`${title}: video still`} fill priority={priority} sizes={sizes} className="object-cover" />
+    <Img src={image} alt={`${title}: video still`} fill preload={priority} sizes={sizes} className="object-cover" />
   ) : null;
 
   const hint = soundHint && (
-    <span className="absolute right-4 top-4 flex items-center gap-1.5 rounded bg-black/60 px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-white backdrop-blur-sm md:right-6 md:top-6">
+    <Badge variant="overlay" className="absolute right-4 top-4 md:right-6 md:top-6">
       <Volume2 className="h-3.5 w-3.5" aria-hidden /> Sound on
-    </span>
+    </Badge>
   );
 
   const playButton = (
@@ -246,9 +264,9 @@ export default function VideoPlayer({
       type="button"
       onClick={start}
       aria-label={`Play ${title}`}
-      className="group absolute inset-0 flex items-end justify-start p-5 md:p-7"
+      className="group absolute inset-0 flex -outline-offset-4 items-end justify-start p-5 md:p-7"
     >
-      <span className="flex items-center gap-3 rounded bg-white py-3 pl-4 pr-5 text-[13px] font-medium uppercase tracking-[0.08em] text-ink transition-colors duration-200 group-hover:bg-accent group-hover:text-white">
+      <span className="play-pill">
         <Play className="h-4 w-4 fill-current" aria-hidden />
         Play
       </span>
@@ -263,9 +281,14 @@ export default function VideoPlayer({
   return (
     <div
       ref={wrap}
+      data-tone="dark"
+      data-video-player
+      tabIndex={-1}
+      role="group"
+      aria-label={`${title}: video player`}
       onKeyDown={onKey}
       onPointerMove={(e) => e.pointerType === "mouse" && started && poke()}
-      className={`relative w-full overflow-hidden rounded bg-media ${realRatio ? "" : ratioCls} ${isFull ? "!rounded-none" : ""} ${
+      className={`relative w-full overflow-hidden rounded bg-media -outline-offset-2 ${realRatio ? "" : ratioCls} ${isFull ? "!rounded-none" : ""} ${
         started && playing && !show ? "cursor-none" : ""
       }`}
       style={realRatio ? { aspectRatio: String(realRatio) } : undefined}
@@ -297,9 +320,10 @@ export default function VideoPlayer({
           {started && (
             <video
               ref={video}
-              className={`absolute inset-0 h-full w-full bg-media object-contain transition-opacity duration-300 ${hasFrame ? "opacity-100" : "opacity-0"}`}
-              preload="metadata"
+              className={`absolute inset-0 h-full w-full bg-media object-contain transition-opacity duration-slow ${hasFrame ? "opacity-100" : "opacity-0"}`}
+              preload="none"
               playsInline
+              crossOrigin={/^https?:/i.test(captions) ? "anonymous" : undefined}
               muted={muted}
               onPlay={() => {
                 setPlaying(true);
@@ -328,6 +352,7 @@ export default function VideoPlayer({
               {mobileSrc && <source src={mobileSrc} type={type} media="(max-width: 1024px)" />}
               {/* Errors on the last <source> mean nothing could be played. */}
               <source src={source.src} type={type} onError={() => setFailed(true)} />
+              {captions && <track kind="captions" src={captions} srcLang="en" label="Captions" default />}
             </video>
           )}
 
@@ -346,8 +371,8 @@ export default function VideoPlayer({
               {/* Loading */}
               {(waiting || !hasFrame) && !ended && (
                 <div aria-hidden className="pointer-events-none absolute inset-0 grid place-items-center">
-                  <span className="grid h-14 w-14 place-items-center rounded-full bg-black/45 backdrop-blur-sm">
-                    <Loader2 className="h-7 w-7 animate-spin text-white" />
+                  <span className="grid h-14 w-14 place-items-center rounded-full bg-scrim/45 backdrop-blur-sm">
+                    <Loader2 className="h-7 w-7 animate-spin text-on-dark" />
                   </span>
                 </div>
               )}
@@ -361,8 +386,8 @@ export default function VideoPlayer({
                   key={skip.key}
                   aria-hidden
                   onAnimationEnd={() => setSkip(null)}
-                  className={`pointer-events-none absolute top-1/2 grid h-16 w-16 -translate-y-1/2 animate-[vp-skip_600ms_ease-out_forwards] place-items-center rounded-full bg-black/50 font-mono text-[13px] text-white ${
-                    skip.dir < 0 ? "left-[18%]" : "right-[18%]"
+                  className={`pointer-events-none absolute top-1/2 grid h-16 w-16 -translate-y-1/2 animate-vp-skip place-items-center rounded-full bg-scrim/50 font-mono text-label text-on-dark ${
+                    skip.dir < 0 ? "left-1/6" : "right-1/6"
                   }`}
                 >
                   {skip.dir < 0 ? "−10s" : "+10s"}
@@ -379,7 +404,7 @@ export default function VideoPlayer({
                   }}
                   aria-label={playing ? "Pause" : "Play"}
                   tabIndex={-1}
-                  className={`absolute left-1/2 top-1/2 hidden h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-opacity duration-200 pointer-coarse:grid ${
+                  className={`absolute left-1/2 top-1/2 hidden h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-scrim/50 text-on-dark backdrop-blur-sm transition-opacity duration-base pointer-coarse:grid ${
                     show && !waiting ? "opacity-100" : "pointer-events-none opacity-0"
                   }`}
                 >
@@ -389,13 +414,13 @@ export default function VideoPlayer({
 
               {/* End screen */}
               {ended && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/65 p-6 text-center text-white backdrop-blur-[2px]">
-                  <button type="button" onClick={replay} className="btn btn-light">
-                    <RotateCcw className="h-4 w-4" aria-hidden /> Replay
-                  </button>
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-scrim/65 p-6 text-center text-on-dark backdrop-blur-xs">
+                  <Button variant="light" onClick={replay} icon={<RotateCcw className="h-4 w-4" aria-hidden />}>
+                    Replay
+                  </Button>
                   {next && (
-                    <Link href={next.href} className="group inline-flex min-h-11 max-w-full items-center gap-2 text-[14px] text-white/85 hover:text-white">
-                      <span className="t-meta text-white/60">Next</span>
+                    <Link href={next.href} className="group inline-flex min-h-11 max-w-full items-center gap-2 text-small text-on-dark/85 hover:text-on-dark">
+                      <span className="t-meta text-on-dark/60">Next</span>
                       <span className="truncate">{next.title}</span>
                       <ArrowRight className="arrow h-4 w-4 shrink-0" aria-hidden />
                     </Link>
@@ -406,8 +431,8 @@ export default function VideoPlayer({
               {/* Control bar */}
               {/* The gradient never takes taps (they reach the surface); only the controls do. */}
               <div
-                className={`pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent px-2 pb-2 pt-12 text-white transition-opacity duration-300 md:px-4 md:pb-3 ${
-                  show && !ended ? "opacity-100 [&>*]:pointer-events-auto" : "opacity-0"
+                className={`pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-scrim/75 via-scrim/35 to-transparent px-2 pb-2 pt-12 text-on-dark transition-opacity duration-slow md:px-4 md:pb-3 ${
+                  show && !ended ? "opacity-100 [&>*]:pointer-events-auto" : "opacity-0 has-[:focus-visible]:opacity-100"
                 }`}
                 onPointerMove={poke}
                 onFocus={poke}
@@ -434,10 +459,15 @@ export default function VideoPlayer({
                   <button type="button" onClick={() => setMuted((m) => !m)} aria-label={muted ? "Unmute" : "Mute"} aria-pressed={muted} className="vp-btn">
                     {muted ? <VolumeX className="h-5 w-5" aria-hidden /> : <Volume2 className="h-5 w-5" aria-hidden />}
                   </button>
-                  <span className="t-meta ml-1 tabular-nums text-white/85">
-                    {fmt(time)} <span className="text-white/50">/ {fmt(duration)}</span>
+                  <span className="t-meta ml-1 tabular-nums text-on-dark/85">
+                    {fmt(time)} <span className="text-on-dark/50">/ {fmt(duration)}</span>
                   </span>
-                  <button type="button" onClick={fullscreen} aria-label={isFull ? "Exit fullscreen" : "Fullscreen"} className="vp-btn ml-auto">
+                  {captions && (
+                    <button type="button" onClick={() => setCaptioned((on) => !on)} aria-label="Captions" aria-pressed={captioned} className="vp-btn ml-auto aria-[pressed=false]:opacity-60">
+                      <Captions className="h-5 w-5" aria-hidden />
+                    </button>
+                  )}
+                  <button type="button" onClick={fullscreen} aria-label={isFull ? "Exit fullscreen" : "Fullscreen"} className={`vp-btn ${captions ? "" : "ml-auto"}`}>
                     {isFull ? <Minimize className="h-5 w-5" aria-hidden /> : <Maximize className="h-5 w-5" aria-hidden />}
                   </button>
                 </div>
@@ -446,9 +476,9 @@ export default function VideoPlayer({
           )}
 
           {failed && (
-            <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-media/90 p-6 text-center text-white">
-              <p className="text-[15px]">This video couldn&apos;t be played here.</p>
-              <a href={source.src} target="_blank" rel="noopener noreferrer" className="link-u text-[14px] text-white/80">
+            <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-media/90 p-6 text-center text-on-dark">
+              <p className="text-body-sm">This video couldn&apos;t be played here.</p>
+              <a href={source.src} target="_blank" rel="noopener noreferrer" className="link-u text-small text-on-dark/80">
                 Open the video file
               </a>
             </div>

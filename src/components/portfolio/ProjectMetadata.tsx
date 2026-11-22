@@ -1,34 +1,32 @@
 import type { Project } from "@/lib/types";
+import Badge from "@/components/ui/Badge";
 
-/** The facts block on a project page. Rows without a value are left out. */
+/** The meta row under the player. Facts without a value are left out. */
 export default function ProjectMetadata({ project }: { project: Project }) {
-  const rows: [string, string][] = (
-    [
-      ["Category", project.categoryName ?? ""],
-      ["Year", project.year],
-      ["Client", project.client],
-      ["Format", project.clientType],
-      ["Duration", project.duration],
-      ["Our role", project.role],
-    ] as [string, string][]
-  ).filter(([, v]) => v);
+  const facts = [
+    ["Category", project.categoryName ?? ""],
+    ["Year", project.year],
+    ["Duration", project.duration],
+    ["Format", [project.clientType, project.aspectRatio].filter(Boolean).join(" · ")],
+    ["Client", project.client],
+  ].filter(([, value]) => value);
 
   return (
-    <dl className="border-t border-ink">
-      {rows.map(([k, v]) => (
-        <div key={k} className="flex justify-between gap-6 border-b border-line py-3.5">
-          <dt className="t-meta pt-0.5 text-secondary-aa">{k}</dt>
-          <dd className="text-right text-[15px]">{v}</dd>
+    <dl data-meta-row className="flex flex-wrap gap-x-10 gap-y-6 border-y border-line py-6">
+      {facts.map(([label, value]) => (
+        <div key={label} className="min-w-28">
+          <dt className="t-meta text-secondary">{label}</dt>
+          <dd className="mt-1.5 text-body-sm">{value}</dd>
         </div>
       ))}
       {project.software.length > 0 && (
-        <div className="border-b border-line py-3.5">
-          <dt className="t-meta text-secondary-aa">Tools used</dt>
-          <dd className="mt-3">
+        <div>
+          <dt className="t-meta text-secondary">Tools used</dt>
+          <dd className="mt-1.5">
             <ul className="flex flex-wrap gap-2">
-              {project.software.map((s) => (
-                <li key={s} className="rounded border border-line bg-surface px-2.5 py-1 text-[13px] leading-5">
-                  {s}
+              {project.software.map((tool) => (
+                <li key={tool}>
+                  <Badge>{tool}</Badge>
                 </li>
               ))}
             </ul>

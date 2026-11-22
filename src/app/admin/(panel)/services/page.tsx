@@ -10,12 +10,12 @@ export default async function ServicesAdmin() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="t-section !text-[40px]">Services</h1>
-        <p className="mt-1 text-[15px] text-secondary-aa">Shown on the home and Services pages, in this order.</p>
+        <h1 className="t-h2 !text-title">Services</h1>
+        <p className="mt-1 text-body-sm text-secondary">Shown on the home and Services pages, in this order.</p>
       </div>
       <ul className="space-y-4">
         {services.map((s) => (
-          <li key={s.id} className="rounded border border-line bg-white p-5">
+          <li key={s.id} className="rounded border border-line bg-surface p-5">
             <RowForm
               action={saveService}
               id={s.id}
@@ -35,7 +35,7 @@ export default async function ServicesAdmin() {
         ))}
       </ul>
       <section className="rounded border border-dashed border-ink/30 p-5">
-        <h2 className="mb-4 text-[16px] font-semibold">Add a service</h2>
+        <h2 className="mb-4 text-body font-semibold">Add a service</h2>
         <RowForm
           action={saveService}
           resetOnSuccess

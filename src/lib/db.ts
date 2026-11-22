@@ -1,6 +1,6 @@
 import "server-only";
 import { env } from "./env";
-import { seedCategories, seedProfile, seedProjectDescription, seedProjects, seedServices } from "./seed";
+import { seedCategories, seedProfile, seedServices } from "./seed";
 
 /*
  * One tiny query interface over two drivers:
@@ -77,6 +77,10 @@ alter table projects add column if not exists aspect_ratio text not null default
 alter table projects add column if not exists gallery jsonb not null default '[]'::jsonb;
 alter table projects add column if not exists seo_title text not null default '';
 alter table projects add column if not exists seo_description text not null default '';
+alter table projects add column if not exists result text not null default '';
+alter table projects add column if not exists captions_url text not null default '';
+alter table projects add column if not exists project_type text;
+alter table projects add column if not exists footage_source text not null default '';
 alter table services add column if not exists deliverables text not null default '';
 alter table services add column if not exists ideal_for text not null default '';
 alter table services add column if not exists process text not null default '';
@@ -91,6 +95,7 @@ create table if not exists inquiries (
   created_at timestamptz not null default now()
 );
 alter table inquiries add column if not exists deadline text not null default '';
+alter table inquiries add column if not exists reference_url text not null default '';
 `;
 
 export function slugify(input: string): string {
@@ -139,17 +144,6 @@ async function migrateAndSeed(db: Db) {
       );
     }
   }
-  for (const [i, p] of seedProjects.entries()) {
-    await db.query(
-      `insert into projects (slug, title, category_id, client_type, summary, description, duration, aspect_ratio, year, featured, is_sample, sort, video_url, thumbnail_url, poster_url)
-       values ($1, $2, (select id from categories where slug = $3), $4, $5, $6, $7, $8, $9, $10, true, $11, $12, $13, $14)
-       on conflict (slug) do update set
-         video_url = coalesce(nullif(projects.video_url, ''), excluded.video_url),
-         thumbnail_url = coalesce(nullif(projects.thumbnail_url, ''), excluded.thumbnail_url),
-         poster_url = coalesce(nullif(projects.poster_url, ''), excluded.poster_url)`,
-      [p.slug, p.title, slugify(p.category), p.clientType, p.summary, seedProjectDescription, p.duration, p.aspectRatio, p.year, p.featured, i, p.videoUrl, p.thumbnailUrl, p.posterUrl]
-    );
-  }
 }
 
 async function connect(): Promise<Db | null> {
@@ -186,17 +180,27 @@ async function connect(): Promise<Db | null> {
   };
 }
 
-const globalForDb = globalThis as unknown as { __veDb?: Promise<Db | null> };
+const globalForDb = globalThis as unknown as { __veDb?: Promise<Db | null>; __veSchema?: string };
 
 /** The database, migrated and seeded on first use; `null` when there is none. */
 export function getDb(): Promise<Db | null> {
+  // In dev the connection outlives a hot reload: apply new columns to it.
+  if (globalForDb.__veDb && globalForDb.__veSchema !== SCHEMA) {
+    globalForDb.__veSchema = SCHEMA;
+    globalForDb.__veDb = globalForDb.__veDb.then(async (db) => {
+      if (db) await migrateAndSeed(db);
+      return db;
+    });
+  }
   if (!globalForDb.__veDb) {
+    globalForDb.__veSchema = SCHEMA;
     globalForDb.__veDb = (async () => {
       const db = await connect();
       if (db) await migrateAndSeed(db);
       return db;
     })().catch((err) => {
       globalForDb.__veDb = undefined;
+      globalForDb.__veSchema = undefined;
       throw err;
     });
   }

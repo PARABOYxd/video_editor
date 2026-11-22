@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Badge from "@/components/ui/Badge";
 
 const LINKS = [
   { href: "/admin", label: "Overview" },
@@ -23,13 +24,13 @@ export default function AdminNav({ unread }: { unread: number }) {
           key={l.href}
           href={l.href}
           aria-current={active(l.href) ? "page" : undefined}
-          className={`flex min-h-10 shrink-0 items-center justify-between gap-3 rounded px-3 text-[14px] ${
-            active(l.href) ? "bg-ink text-white" : "text-ink hover:bg-paper"
+          className={`flex min-h-10 shrink-0 items-center justify-between gap-3 rounded px-3 text-small ${
+            active(l.href) ? "bg-ink text-on-dark" : "text-ink hover:bg-paper"
           }`}
         >
           {l.label}
           {l.href === "/admin/inquiries" && unread > 0 && (
-            <span className={`rounded px-2 text-[12px] ${active(l.href) ? "bg-paper text-ink" : "bg-accent text-white"}`}>{unread}</span>
+            <Badge variant="accent" className="!py-0">{unread}</Badge>
           )}
         </Link>
       ))}

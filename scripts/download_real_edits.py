@@ -7,54 +7,9 @@ IMAGES_DIR = r"c:\Users\admin\Herd\Video_Editor\public\images"
 os.makedirs(TARGET_DIR, exist_ok=True)
 os.makedirs(IMAGES_DIR, exist_ok=True)
 
-VIDEOS = [
-    {
-        "id": "6kYRUsXtS4s",
-        "name": "showreel-cinematic.mp4",
-        "title": "Master Showreel",
-        "copy_to": "showreel-loop.mp4"
-    },
-    {
-        "id": "Nz5EXDeCzGw",
-        "name": "credit-card-viral-reel.mp4",
-        "title": "Viral Instagram / Short-Form Reel"
-    },
-    {
-        "id": "GiuNmNF3MV4",
-        "name": "moksha-d2c-commercial.mp4",
-        "title": "D2C Brand Commercial Ad"
-    },
-    {
-        "id": "aJjmG6l6vu8",
-        "name": "quick-commerce-youtube.mp4",
-        "title": "YouTube Video Essay / Documentary"
-    },
-    {
-        "id": "GoVs5FcFfgY",
-        "name": "udaipur-royal-wedding.mp4",
-        "title": "Royal Cinematic Wedding Teaser"
-    },
-    {
-        "id": "HnFmX1YdSgA",
-        "name": "kredo-brand-anthem.mp4",
-        "title": "Brand Anthem Film"
-    },
-    {
-        "id": "n_1QuRG5zMk",
-        "name": "modern-founder-podcast.mp4",
-        "title": "Multi-Cam Podcast Studio Edit"
-    },
-    {
-        "id": "oM64pxKoZVQ",
-        "name": "kala-motion-graphics.mp4",
-        "title": "Motion Graphics & Kinetic Showreel"
-    },
-    {
-        "id": "_Rf6l9aOgw8",
-        "name": "himalayan-expedition.mp4",
-        "title": "Cinematic Travel & Documentary Reel"
-    }
-]
+# Only add videos you own or have a licence for. Never another creator's work.
+# Each item: {"id": ..., "name": "file.mp4", "title": ...}
+VIDEOS = []
 
 for item in VIDEOS:
     vid_id = item["id"]

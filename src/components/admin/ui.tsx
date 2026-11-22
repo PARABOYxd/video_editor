@@ -1,6 +1,7 @@
 "use client";
 
 import type { FormState } from "@/app/admin/actions";
+import Button from "@/components/ui/Button";
 
 export function Submit({
   children,
@@ -14,16 +15,16 @@ export function Submit({
   className?: string;
 }) {
   return (
-    <button type="submit" disabled={pending} aria-busy={pending} className={`btn btn-primary !min-h-11 ${className}`}>
-      {pending ? pendingText : children}
-    </button>
+    <Button type="submit" size="sm" loading={pending} loadingText={pendingText} className={className}>
+      {children}
+    </Button>
   );
 }
 
 export function FormMessage({ state }: { state: FormState }) {
   if (!state.message) return null;
   return (
-    <p role={state.status === "error" ? "alert" : "status"} className={`text-[14px] ${state.status === "error" ? "text-[#b42318]" : "text-emerald-700"}`}>
+    <p role={state.status === "error" ? "alert" : "status"} className={`text-small ${state.status === "error" ? "text-danger" : "text-success"}`}>
       {state.message}
     </p>
   );
@@ -49,7 +50,7 @@ export function Field({
         {label}
       </label>
       {children}
-      {hint && !error && <p className="mt-1.5 text-[12.5px] text-secondary-aa">{hint}</p>}
+      {hint && !error && <p className="mt-1.5 text-caption text-secondary">{hint}</p>}
       {error && <p className="field-error">{error}</p>}
     </div>
   );
@@ -65,7 +66,7 @@ export function DeleteButton({ action, id, label = "Delete", confirmText }: { ac
       }}
     >
       <input type="hidden" name="id" value={id} />
-      <button type="submit" className="min-h-10 rounded px-3 text-[14px] text-[#b42318] hover:bg-[#b42318]/10">
+      <button type="submit" className="min-h-10 rounded px-3 text-small text-danger hover:bg-danger/10">
         {label}
       </button>
     </form>

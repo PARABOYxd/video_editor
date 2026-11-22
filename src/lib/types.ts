@@ -31,12 +31,17 @@ export type Profile = {
   socials: SocialLink[];
   showreelUrl: string; // YouTube / Vimeo / MP4 / WebM link to the editors' own reel
   showreelPoster: string;
+  showreelCaptions?: string; // WebVTT
 };
 
 export type Category = { id: number; name: string; slug: string; sort: number };
 
 export const ASPECT_RATIOS = ["16:9", "21:9", "4:3", "1:1", "4:5", "9:16"] as const;
 export type AspectRatio = (typeof ASPECT_RATIOS)[number];
+
+/** client: commissioned work. spec: our own edit of licensed footage. */
+export const PROJECT_KINDS = ["client", "spec"] as const;
+export type ProjectKind = (typeof PROJECT_KINDS)[number];
 
 export type Project = {
   id: number;
@@ -53,6 +58,8 @@ export type Project = {
   objective: string;
   approach: string;
   role: string;
+  result: string;
+  captionsUrl: string; // WebVTT for the project video
   software: string[];
   duration: string;
   videoUrl: string;
@@ -64,9 +71,13 @@ export type Project = {
   featured: boolean;
   published: boolean;
   isSample: boolean;
+  /** Not set means not declared: shown, but never claimed as ours in structured data. */
+  projectType?: ProjectKind;
+  footageSource: string; // e.g. "Pexels"; required for spec projects
   sort: number;
   seoTitle: string;
   seoDescription: string;
+  createdAt: string;
   updatedAt: string;
 };
 
@@ -97,6 +108,7 @@ export type Inquiry = {
   projectType: string;
   budget: string;
   deadline: string;
+  reference: string;
   message: string;
   read: boolean;
   createdAt: string;

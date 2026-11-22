@@ -12,7 +12,7 @@
  *   node scripts/make-video-assets.mjs [--force] [--only=name]
  */
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const VIDEOS = "public/videos";
@@ -21,21 +21,12 @@ const force = process.argv.includes("--force");
 const only = process.argv.find((a) => a.startsWith("--only="))?.slice(7);
 
 /** Poster frame (seconds) per video. Pick a frame with colour, a face or action. */
-const POSTER_AT = {
-  "showreel-cinematic": 17.8,
-  "credit-card-viral-reel": 9.6,
-  "moksha-d2c-commercial": 34.4,
-  "himalayan-expedition": 3,
-  "kala-motion-graphics": 3,
-  "kredo-brand-anthem": 3,
-  "modern-founder-podcast": 3,
-  "quick-commerce-youtube": 3,
-  "udaipur-royal-wedding": 3,
-};
+const POSTER_AT = {};
 
 const ff = (...args) => execFileSync("ffmpeg", ["-v", "error", "-y", ...args], { stdio: "inherit" });
 const isMaster = (f) => f.endsWith(".mp4") && !/-(preview|720)\.mp4$/.test(f);
 
+mkdirSync(VIDEOS, { recursive: true });
 for (const file of readdirSync(VIDEOS).filter(isMaster)) {
   const name = file.replace(/\.mp4$/, "");
   if (only && only !== name) continue;
@@ -59,7 +50,7 @@ for (const file of readdirSync(VIDEOS).filter(isMaster)) {
   }
 
   const poster = join(IMAGES, `${name}-poster.jpg`);
-  if (force || !existsSync(poster) || (POSTER_AT[name] ?? 3) !== 3) {
+  if (force || !existsSync(poster)) {
     console.log(`poster   ${name} @ ${POSTER_AT[name] ?? 3}s`);
     ff("-ss", String(POSTER_AT[name] ?? 3), "-i", src, "-frames:v", "1", "-q:v", "3", poster);
   }

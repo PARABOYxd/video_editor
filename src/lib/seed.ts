@@ -1,4 +1,4 @@
-import type { AspectRatio, Profile } from "./types";
+import type { Profile } from "./types";
 
 /*
  * Starter content, written to the database on first run and served
@@ -6,10 +6,8 @@ import type { AspectRatio, Profile } from "./types";
  *
  * - The profile (names, roles, software, bio facts) comes from the previous
  *   version of this site. Copy is in the first person plural: this is a duo.
- * - The six projects are PLACEHOLDERS. They have no thumbnails and no video,
- *   so the site shows clearly labelled placeholder frames instead of
- *   borrowed imagery. Titles follow the brief's illustrative examples and
- *   make no client claims.
+ * - There are no starter projects and no showreel. Only the studio's own
+ *   work, added in /admin, appears on the site.
  * - There are no testimonials. Add genuine ones only.
  */
 
@@ -57,144 +55,11 @@ export const seedProfile: Profile = {
     { label: "LinkedIn", url: "https://linkedin.com/in/rishab-jain-editor" },
     { label: "YouTube", url: "https://youtube.com/@rishabkunaledits" },
   ],
-  showreelUrl: "/videos/showreel-cinematic.mp4",
-  showreelPoster: "/images/showreel-cinematic-poster.jpg",
+  showreelUrl: "",
+  showreelPoster: "",
 };
 
 export const seedCategories = ["Reels & Shorts", "YouTube", "Brand Films", "Commercials", "Travel", "Motion Graphics"];
-
-const PLACEHOLDER_NOTE =
-  "High-production creative post-production edit crafted with meticulous attention to pacing, narrative structure, audio design, and color finishing.";
-
-export const seedProjects: {
-  slug: string;
-  title: string;
-  category: string;
-  clientType: string;
-  summary: string;
-  duration: string;
-  aspectRatio: AspectRatio;
-  year: string;
-  featured: boolean;
-  videoUrl: string;
-  thumbnailUrl: string;
-  posterUrl: string;
-}[] = [
-  {
-    slug: "the-art-of-travel",
-    title: "4K Cinematic Travel & Mountain Expedition (Ronit Batra)",
-    category: "Travel",
-    clientType: "Travel film",
-    summary: "A cinematic 4K travel film paced around place, light, sound design, whip pans and mountain vistas.",
-    duration: "01:20",
-    aspectRatio: "16:9",
-    year: "2026",
-    featured: true,
-    videoUrl: "/videos/himalayan-expedition.mp4",
-    thumbnailUrl: "/images/himalayan-expedition-poster.jpg",
-    posterUrl: "/images/himalayan-expedition-poster.jpg",
-  },
-  {
-    slug: "beyond-the-frame",
-    title: "Beyond the Frame: Nordisk Campaign (Blackmagic 6K)",
-    category: "Brand Films",
-    clientType: "Brand film",
-    summary: "A modern brand film shot on Blackmagic 6K Pro with atmospheric sound design and crisp pacing.",
-    duration: "00:40",
-    aspectRatio: "16:9",
-    year: "2026",
-    featured: true,
-    videoUrl: "/videos/kredo-brand-anthem.mp4",
-    thumbnailUrl: "/images/kredo-brand-anthem-poster.jpg",
-    posterUrl: "/images/kredo-brand-anthem-poster.jpg",
-  },
-  {
-    slug: "stories-in-motion",
-    title: "Raj Shamani Viral Retention Reel (Hindi · 9:16)",
-    category: "Reels & Shorts",
-    clientType: "Social media campaign",
-    summary: "Thumb-stopping 9:16 vertical Hindi reel with glowing kinetic captions, sound pops and zoom punches.",
-    duration: "00:35",
-    aspectRatio: "9:16",
-    year: "2026",
-    featured: true,
-    videoUrl: "/videos/credit-card-viral-reel.mp4",
-    thumbnailUrl: "/images/credit-card-viral-reel-poster.jpg",
-    posterUrl: "/images/credit-card-viral-reel-poster.jpg",
-  },
-  {
-    slug: "a-different-perspective",
-    title: "Think School: Ratan Tata & Titan Watches Case Study",
-    category: "YouTube",
-    clientType: "Long-form YouTube",
-    summary: "Indian business documentary video essay structured with 3D paper tears, newspaper headlines, and Hindi voiceover.",
-    duration: "00:48",
-    aspectRatio: "16:9",
-    year: "2026",
-    featured: true,
-    videoUrl: "/videos/quick-commerce-youtube.mp4",
-    thumbnailUrl: "/images/quick-commerce-youtube-poster.jpg",
-    posterUrl: "/images/quick-commerce-youtube-poster.jpg",
-  },
-  {
-    slug: "launch-day",
-    title: "Royal Enfield Himalayan 4K Commercial Ad",
-    category: "Commercials",
-    clientType: "Product commercial",
-    summary: "High-octane 4K commercial ad edit with iconic engine sound, mountain visuals, whip transitions, and speed ramps.",
-    duration: "00:39",
-    aspectRatio: "16:9",
-    year: "2026",
-    featured: false,
-    videoUrl: "/videos/moksha-d2c-commercial.mp4",
-    thumbnailUrl: "/images/moksha-d2c-commercial-poster.jpg",
-    posterUrl: "/images/moksha-d2c-commercial-poster.jpg",
-  },
-  {
-    slug: "type-in-motion",
-    title: "3D Kinetic Typography & Motion Graphics (4K)",
-    category: "Motion Graphics",
-    clientType: "Title sequence",
-    summary: "Titles, lower thirds, 3D animated typography, liquid simulations and transition packaging for broadcast.",
-    duration: "00:48",
-    aspectRatio: "16:9",
-    year: "2026",
-    featured: false,
-    videoUrl: "/videos/kala-motion-graphics.mp4",
-    thumbnailUrl: "/images/kala-motion-graphics-poster.jpg",
-    posterUrl: "/images/kala-motion-graphics-poster.jpg",
-  },
-  {
-    slug: "royal-oath-wedding",
-    title: "A Royal Oath: City Palace Heritage Wedding",
-    category: "Travel",
-    clientType: "Wedding film",
-    summary: "Heirloom wedding film with golden hour tones, couple Hindi vows and cinematic palace warmth.",
-    duration: "01:01",
-    aspectRatio: "16:9",
-    year: "2026",
-    featured: true,
-    videoUrl: "/videos/udaipur-royal-wedding.mp4",
-    thumbnailUrl: "/images/udaipur-royal-wedding-poster.jpg",
-    posterUrl: "/images/udaipur-royal-wedding-poster.jpg",
-  },
-  {
-    slug: "modern-founder-podcast",
-    title: "Raj Shamani Figuring Out: Multi-Cam Studio (Hindi)",
-    category: "YouTube",
-    clientType: "Multi-cam podcast",
-    summary: "Multi-camera studio interview edit with clean Hindi audio sync, lower thirds, and dialogue-driven camera switching.",
-    duration: "00:45",
-    aspectRatio: "16:9",
-    year: "2026",
-    featured: false,
-    videoUrl: "/videos/modern-founder-podcast.mp4",
-    thumbnailUrl: "/images/modern-founder-podcast-poster.jpg",
-    posterUrl: "/images/modern-founder-podcast-poster.jpg",
-  },
-];
-
-export const seedProjectDescription = PLACEHOLDER_NOTE;
 
 export const seedServices: { title: string; description: string; deliverables: string; idealFor: string; process: string }[] = [
   {

@@ -10,12 +10,12 @@ export default async function CategoriesAdmin() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="t-section !text-[40px]">Categories</h1>
-        <p className="mt-1 text-[15px] text-secondary-aa">Used for the filter on the Work page. Deleting a category keeps its projects, just uncategorised.</p>
+        <h1 className="t-h2 !text-title">Categories</h1>
+        <p className="mt-1 text-body-sm text-secondary">Used for the filter on the Work page. Deleting a category keeps its projects, just uncategorised.</p>
       </div>
       <ul className="space-y-4">
         {categories.map((c) => (
-          <li key={c.id} className="rounded border border-line bg-white p-5">
+          <li key={c.id} className="rounded border border-line bg-surface p-5">
             <RowForm
               action={saveCategory}
               id={c.id}
@@ -31,7 +31,7 @@ export default async function CategoriesAdmin() {
         ))}
       </ul>
       <section className="rounded border border-dashed border-ink/30 p-5">
-        <h2 className="mb-4 text-[16px] font-semibold">Add a category</h2>
+        <h2 className="mb-4 text-body font-semibold">Add a category</h2>
         <RowForm
           action={saveCategory}
           resetOnSuccess

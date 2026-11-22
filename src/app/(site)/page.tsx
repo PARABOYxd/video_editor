@@ -1,11 +1,15 @@
 import AboutPreview from "@/components/home/AboutPreview";
-import ContactCTA from "@/components/home/ContactCTA";
+import Faq from "@/components/home/Faq";
 import FeaturedWork from "@/components/home/FeaturedWork";
 import Hero from "@/components/home/Hero";
+import Process from "@/components/home/Process";
 import ServicesPreview from "@/components/home/ServicesPreview";
+import Showreel from "@/components/home/Showreel";
+import SocialProof from "@/components/home/SocialProof";
 import Testimonials from "@/components/home/Testimonials";
+import JsonLd from "@/components/seo/JsonLd";
 import { getProfile, getProjects, getServices, getTestimonials } from "@/lib/content";
-import { pageMetadata } from "@/lib/seo";
+import { pageMetadata, siteJsonLd } from "@/lib/seo";
 
 // Refreshed immediately by revalidatePath() when the admin saves; this is a backstop.
 export const revalidate = 3600;
@@ -13,10 +17,12 @@ export const revalidate = 3600;
 export async function generateMetadata() {
   const profile = await getProfile();
   return pageMetadata({
-    title: `${profile.brandName} · ${profile.roleTitle}`,
-    description: profile.heroText,
+    title: "Video Editors in Pune for YouTube & Reels | Rytora Studio",
+    absolute: true,
+    description: `${profile.brandName} are video editors in Pune, India, offering YouTube video editing, Instagram Reels editing, brand films and cinematic travel videos.`,
     path: "/",
-    image: profile.showreelPoster || profile.team[0]?.photoUrl,
+    image: profile.showreelPoster || undefined,
+    og: "home",
   });
 }
 
@@ -26,12 +32,18 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero profile={profile} featured={featured.find((p) => p.videoUrl) ?? featured[0] ?? null} />
-      <FeaturedWork projects={featured} total={projects.length} />
+      <JsonLd data={siteJsonLd(profile, services)} />
+      <Hero profile={profile} />
+      <div id="after-hero">
+        <SocialProof />
+        <Showreel profile={profile} />
+        <FeaturedWork projects={featured} total={projects.length} />
+      </div>
       <ServicesPreview services={services} />
-      <AboutPreview profile={profile} />
+      <Process />
       <Testimonials items={testimonials} />
-      <ContactCTA profile={profile} />
+      <AboutPreview profile={profile} />
+      <Faq />
     </>
   );
 }

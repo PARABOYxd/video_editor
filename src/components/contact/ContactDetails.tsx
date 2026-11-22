@@ -12,23 +12,25 @@ export default function ContactDetails({ profile }: { profile: Profile }) {
   ];
 
   return (
-    <dl className="border-t border-ink">
-      {rows.map((r) => (
-        <div key={r.label} className="flex flex-col gap-1 border-b border-line py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-          <dt className="t-meta text-secondary-aa">{r.label}</dt>
-          <dd className="min-w-0 text-[16px] sm:text-right">
-            <a href={r.href} className="tap-target link-u [overflow-wrap:anywhere]" {...(r.external && { target: "_blank", rel: "noopener noreferrer" })}>
-              {r.value}
-            </a>
-          </dd>
-        </div>
-      ))}
-      {profile.availability && (
-        <div className="flex items-center gap-3 py-4 text-[15px]">
-          <span aria-hidden className="h-2 w-2 rounded-full bg-accent" />
-          {profile.availability}
-        </div>
-      )}
-    </dl>
+    <>
+      <dl className="border-t border-ink">
+        {rows.map((r) => (
+          <div key={r.label} className="flex flex-col gap-1 border-b border-line py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+            <dt className="t-meta text-secondary">{r.label}</dt>
+            <dd className="min-w-0 text-body sm:text-right">
+              <a href={r.href} className="tap-target link-u [overflow-wrap:anywhere]" {...(r.external && { target: "_blank", rel: "noopener noreferrer" })}>
+                {r.value}
+              </a>
+            </dd>
+          </div>
+        ))}
+      </dl>
+        {profile.availability && (
+          <div className="flex items-center gap-3 py-4 text-body-sm">
+            <span aria-hidden className="h-2 w-2 rounded-full bg-accent" />
+            {profile.availability}
+          </div>
+        )}
+    </>
   );
 }

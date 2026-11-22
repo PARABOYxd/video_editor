@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   images: {
+    formats: ["image/avif", "image/webp"],
+    // The widest slot is 1280px: nothing needs the 3840px default.
+    deviceSizes: [360, 420, 640, 750, 828, 1080, 1280, 1600, 1920],
     qualities: [75, 90],
     remotePatterns: [
       // Thumbnails uploaded from the admin (Vercel Blob)
@@ -22,10 +26,10 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // Old routes from the previous version of the site
+      // Old routes from the previous version of the site. /projects/:slug is in
+      // src/proxy.ts (withdrawn slugs must 410, not redirect) and /showreel in
+      // src/app/showreel/route.ts (it depends on whether a reel exists).
       { source: "/projects", destination: "/work", permanent: true },
-      { source: "/projects/:slug", destination: "/work/:slug", permanent: true },
-      { source: "/showreel", destination: "/#showreel", permanent: true },
     ];
   },
   turbopack: {

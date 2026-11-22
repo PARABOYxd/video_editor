@@ -1,13 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ContactCTA from "@/components/home/ContactCTA";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import Gallery from "@/components/portfolio/Gallery";
 import ProjectMetadata from "@/components/portfolio/ProjectMetadata";
+import ProjectPager from "@/components/portfolio/ProjectPager";
 import RelatedProjects from "@/components/portfolio/RelatedProjects";
 import { isVertical, thumbnailOf } from "@/components/portfolio/ProjectThumbnail";
-import Img from "@/components/ui/Img";
-import VideoPlayer from "@/components/ui/VideoPlayer";
-import { getProfile, getProjectBySlug, getProjects } from "@/lib/content";
-import { pageMetadata, projectJsonLd } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
+import Badge from "@/components/ui/Badge";
+import Container from "@/components/ui/Container";
+import Eyebrow from "@/components/ui/Eyebrow";
+import LazyPlayer from "@/components/ui/LazyPlayer";
+import Section from "@/components/ui/Section";
+import { getProfile, getProjectBySlug, getProjects, getServices } from "@/lib/content";
+import { pageMetadata, projectDescription, projectJsonLd, projectTitle } from "@/lib/seo";
+import { serviceDetails } from "@/lib/service-details";
+import { parseVideo } from "@/lib/video";
 
 export const revalidate = 3600;
 
@@ -17,13 +25,16 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps<"/work/[slug]">) {
   const { slug } = await params;
-  const project = await getProjectBySlug(slug);
-  if (!project) return {};
+  const [project, profile] = await Promise.all([getProjectBySlug(slug), getProfile()]);
+  if (!project) notFound();
+  const { title, absolute } = projectTitle(project);
   return pageMetadata({
-    title: project.seoTitle || `${project.title}${project.categoryName ? ` · ${project.categoryName}` : ""}`,
-    description: project.seoDescription || project.summary || project.description.slice(0, 155),
+    title,
+    absolute,
+    description: projectDescription(project, profile),
     path: `/work/${project.slug}`,
-    image: thumbnailOf(project) || undefined,
+    image: project.posterUrl || thumbnailOf(project) || undefined,
+    og: "project",
     type: "video.other",
   });
 }
@@ -32,104 +43,115 @@ const paragraphs = (text: string) => text.split(/\n{2,}/).map((p) => p.trim()).f
 
 export default async function ProjectPage({ params }: PageProps<"/work/[slug]">) {
   const { slug } = await params;
-  const [project, profile, all] = await Promise.all([getProjectBySlug(slug), getProfile(), getProjects()]);
+  const [project, profile, all, services] = await Promise.all([getProjectBySlug(slug), getProfile(), getProjects(), getServices()]);
   if (!project) notFound();
 
-  const vertical = isVertical(project);
   const idx = all.findIndex((p) => p.id === project.id);
-  const nextProject = all.length > 1 ? all[(idx + 1) % all.length] : null;
-  const next = nextProject && nextProject.id !== project.id ? { href: `/work/${nextProject.slug}`, title: nextProject.title } : undefined;
-  const story = (
-    [
-      ["Overview", project.description],
-      ["Background", project.background],
-      ["Creative objective", project.objective],
-      ["Editing approach", project.approach],
-      ["Our role", project.role],
-    ] as const
-  ).filter(([, text]) => text.trim());
+  const nextProject = all[(idx + 1) % all.length];
+  const previous = all[(idx - 1 + all.length) % all.length];
+  const hasSiblings = all.length > 1 && idx >= 0;
+  const next = hasSiblings ? { href: `/work/${nextProject.slug}`, title: nextProject.title } : undefined;
+
+  const vertical = isVertical(project);
+  const poster = project.posterUrl || thumbnailOf(project);
+  // A project with neither video nor still gets no media block, rather than an empty player.
+  const hasMedia = parseVideo(project.videoUrl).kind !== "none" || Boolean(poster);
+  const service = project.categorySlug ? services.map(serviceDetails).find((s) => s.category === project.categorySlug) : undefined;
+
+  // "Brief" is the context and the goal. Without those fields, the overview is the brief.
+  const briefFields = [project.background, project.objective].filter((t) => t.trim());
+  const sections = [
+    { title: "Overview", text: briefFields.length ? project.description : "" },
+    { title: "Brief", text: briefFields.length ? briefFields.join("\n\n") : project.description },
+    { title: "Approach", text: project.approach },
+    { title: "Result", text: project.result },
+    { title: "Our role", text: project.role },
+  ].filter((s) => s.text.trim());
 
   return (
     <article>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(projectJsonLd(project, profile)) }} />
+      <JsonLd data={projectJsonLd(project, profile)} />
 
-      {/* Title block */}
-      <header className="container-site pb-12 pt-10 md:pb-16 md:pt-16">
-        <nav aria-label="Breadcrumb" className="t-meta text-secondary-aa">
-          <Link href="/work" className="tap-target link-u hover:text-ink">Work</Link>
-          <span aria-hidden> / </span>
-          <span className="text-ink">{project.title}</span>
-        </nav>
-        <div className="grid-12 mt-10 gap-y-6">
+      <Container as="header" className="pb-10 pt-6 md:pb-14">
+        <Breadcrumbs
+          items={[
+            { name: "Work", path: "/work" },
+            { name: project.title, path: `/work/${project.slug}` },
+          ]}
+        />
+        <div className="grid-12 mt-8 gap-y-6">
           <div className="col-span-12 lg:col-span-8">
-            <p className="t-meta flex flex-wrap items-center gap-x-3 text-secondary-aa">
-              <span aria-hidden className="h-px w-8 bg-accent" />
-              {[project.categoryName, project.year].filter(Boolean).join(" · ")}
-            </p>
-            <h1 className="t-page mt-5 text-balance">{project.title}</h1>
+            {project.categoryName && <Eyebrow>{project.categoryName}</Eyebrow>}
+            <h1 className="t-h1 mt-5 [overflow-wrap:anywhere]">{project.title}</h1>
+            {project.projectType === "spec" && <Badge className="mt-5">Spec project</Badge>}
+            {project.footageSource && <p className="mt-3 text-caption text-secondary">Footage: {project.footageSource}</p>}
           </div>
-          {project.summary && <p className="t-lead col-span-12 text-secondary-aa lg:col-span-4 lg:self-end">{project.summary}</p>}
+          {project.summary && <p className="t-lead col-span-12 text-secondary lg:col-span-4 lg:self-end">{project.summary}</p>}
         </div>
-      </header>
+      </Container>
 
-      {/* Featured video */}
-      {vertical ? (
-        <div className="bg-media py-10 md:py-16">
-          <div className="container-site">
-            <div className="mx-auto w-full max-w-[420px]">
-              <VideoPlayer url={project.videoUrl} poster={project.posterUrl || thumbnailOf(project)} title={project.title} aspect={project.aspectRatio} priority sizes="420px" next={next} />
+      {!hasMedia ? null : vertical ? (
+        <div data-tone="dark" className="bg-media py-10 md:py-16">
+          <Container>
+            <div className="mx-auto w-full max-w-reel">
+              <LazyPlayer url={project.videoUrl} poster={poster} title={project.title} aspect={project.aspectRatio} captions={project.captionsUrl} sizes="(min-width: 460px) 420px, 92vw" next={next} />
             </div>
-          </div>
+          </Container>
         </div>
       ) : (
-        <div className="container-site">
-          <VideoPlayer url={project.videoUrl} poster={project.posterUrl || thumbnailOf(project)} title={project.title} aspect={project.aspectRatio} priority next={next} />
-        </div>
+        <Container>
+          <LazyPlayer url={project.videoUrl} poster={poster} title={project.title} aspect={project.aspectRatio} captions={project.captionsUrl} sizes="(min-width: 1408px) 1280px, 92vw" next={next} />
+        </Container>
       )}
 
-      {/* Case study */}
-      <div className="container-site section grid-12 gap-y-12">
-        <aside className="col-span-12 md:col-span-5 lg:col-span-4">
-          <div className="md:sticky md:top-28">
-            <ProjectMetadata project={{ ...project, role: "" }} />
-          </div>
-        </aside>
-        <div className="col-span-12 space-y-12 md:col-span-7 md:col-start-6 lg:col-span-7 lg:col-start-6">
-          {story.map(([title, text]) => (
-            <section key={title}>
-              <h2 className="t-meta flex items-center gap-3 text-secondary-aa">
-                <span aria-hidden className="h-px w-8 bg-accent" />
+      <Container className="pt-8">
+        <ProjectMetadata project={project} />
+      </Container>
+
+      <Section as="div" className="grid-12 gap-y-12">
+        <div data-reveal-group className="col-span-12 space-y-12 lg:col-span-8 lg:col-start-3">
+          {sections.map(({ title, text }) => (
+            <section key={title} className="grid gap-4 md:grid-cols-4">
+              <Eyebrow as="h2" className="self-start pt-1">
                 {title}
-              </h2>
-              <div className="mt-4 space-y-4 text-[17px] leading-[1.7]">
+              </Eyebrow>
+              <div className="t-prose space-y-4 md:col-span-3">
                 {paragraphs(text).map((p, i) => (
                   <p key={i}>{p}</p>
                 ))}
               </div>
             </section>
           ))}
+          <p className="max-w-measure text-body text-secondary">
+            Planning something similar?{" "}
+            {service ? (
+              <>
+                See what our{" "}
+                <Link href={`/services#${service.slug}`} className="tap-target link-u text-ink">
+                  {service.title.toLowerCase()} service
+                </Link>{" "}
+                includes.
+              </>
+            ) : (
+              <Link href="/services" className="tap-target link-u text-ink">
+                See our video editing services.
+              </Link>
+            )}
+          </p>
         </div>
-      </div>
+      </Section>
 
-      {/* Additional visuals */}
       {project.gallery.length > 0 && (
-        <section className="container-site pb-24" aria-label="Stills from the project">
-          <ul className="grid gap-6 md:grid-cols-2">
-            {project.gallery.map((src, i) => (
-              <li key={src} className={project.gallery.length % 2 === 1 && i === 0 ? "md:col-span-2" : ""}>
-                <div className={`relative overflow-hidden rounded bg-media ${project.gallery.length % 2 === 1 && i === 0 ? "aspect-[21/9]" : "aspect-[3/2]"}`}>
-                  <Img src={src} alt={`${project.title}, still ${i + 1}`} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover" />
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <Container as="section" className="pb-page-bottom" aria-labelledby="stills-title">
+          <Eyebrow as="h2" id="stills-title" className="mb-8">
+            Stills
+          </Eyebrow>
+          <Gallery images={project.gallery} title={project.title} />
+        </Container>
       )}
 
       <RelatedProjects current={project} all={all} />
-      <div className="border-t border-line">
-        <ContactCTA profile={profile} title="Have a project like this?" />
-      </div>
+      {hasSiblings && <ProjectPager previous={previous} next={nextProject} />}
     </article>
   );
 }

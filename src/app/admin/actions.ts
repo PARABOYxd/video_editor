@@ -10,6 +10,7 @@ import { getProfile } from "@/lib/content";
 import { requireDb, slugify } from "@/lib/db";
 import { adminConfigured, env } from "@/lib/env";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { isRetiredMedia, isRetiredSlug } from "@/lib/retired";
 import type { Profile } from "@/lib/types";
 import { uploadImage } from "@/lib/upload";
 import {
@@ -95,6 +96,8 @@ export async function saveProject(_prev: FormState, fd: FormData): Promise<FormS
     objective: str(fd, "objective"),
     approach: str(fd, "approach"),
     role: str(fd, "role"),
+    result: str(fd, "result"),
+    captionsUrl: str(fd, "captionsUrl"),
     software: lines(str(fd, "software")),
     aspectRatio: str(fd, "aspectRatio") || "16:9",
     gallery: lines(str(fd, "gallery")),
@@ -108,6 +111,8 @@ export async function saveProject(_prev: FormState, fd: FormData): Promise<FormS
     featured: bool(fd, "featured"),
     published: bool(fd, "published"),
     sort: str(fd, "sort") || 0,
+    projectType: str(fd, "projectType") || undefined,
+    footageSource: str(fd, "footageSource"),
   });
   if (!parsed.success) return { status: "error", message: "Please fix the highlighted fields.", errors: fieldErrors(parsed.error) };
 
@@ -116,6 +121,9 @@ export async function saveProject(_prev: FormState, fd: FormData): Promise<FormS
     return { status: "error", message: "Please fix the highlighted fields.", errors: { videoUrl: "Use a YouTube, Vimeo or direct .mp4 link." } };
   }
   const slug = p.slug || slugify(p.title);
+  if (isRetiredSlug(slug)) {
+    return { status: "error", message: "Please fix the highlighted fields.", errors: { slug: "This URL belongs to a withdrawn project. Enter a different slug." } };
+  }
 
   try {
     const db = await requireDb();
@@ -141,22 +149,24 @@ export async function saveProject(_prev: FormState, fd: FormData): Promise<FormS
     const values = [
       slug, p.title, p.categoryId, p.client, p.clientType, p.summary, p.description, p.background, p.objective, p.approach,
       p.role, JSON.stringify(p.software), p.duration, p.videoUrl, posterUrl, thumbnailUrl, p.aspectRatio, JSON.stringify(gallery),
-      p.year, p.featured, p.published, p.sort, p.seoTitle, p.seoDescription,
+      p.year, p.featured, p.published, p.sort, p.seoTitle, p.seoDescription, p.projectType ?? null, p.footageSource,
+      p.result, p.captionsUrl,
     ];
     if (id) {
       await db.query(
         `update projects set slug=$1, title=$2, category_id=$3, client=$4, client_type=$5, summary=$6, description=$7,
          background=$8, objective=$9, approach=$10, role=$11, software=$12::jsonb, duration=$13, video_url=$14,
          poster_url=$15, thumbnail_url=$16, aspect_ratio=$17, gallery=$18::jsonb, year=$19, featured=$20, published=$21,
-         sort=$22, seo_title=$23, seo_description=$24, is_sample=false, updated_at=now() where id=$25`,
+         sort=$22, seo_title=$23, seo_description=$24, project_type=$25, footage_source=$26, result=$27, captions_url=$28,
+         is_sample=false, updated_at=now() where id=$29`,
         [...values, id]
       );
     } else {
       await db.query(
         `insert into projects (slug, title, category_id, client, client_type, summary, description, background, objective,
          approach, role, software, duration, video_url, poster_url, thumbnail_url, aspect_ratio, gallery, year, featured,
-         published, sort, seo_title, seo_description)
-         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15,$16,$17,$18::jsonb,$19,$20,$21,$22,$23,$24)`,
+         published, sort, seo_title, seo_description, project_type, footage_source, result, captions_url)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::jsonb,$13,$14,$15,$16,$17,$18::jsonb,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)`,
         values
       );
     }
@@ -322,6 +332,9 @@ export async function saveProfile(_prev: FormState, fd: FormData): Promise<FormS
     if (showreelUrl && parseVideo(showreelUrl).kind === "none") {
       return { status: "error", message: "Please fix the highlighted fields.", errors: { showreelUrl: "Use a YouTube, Vimeo or direct .mp4 link." } };
     }
+    if (isRetiredMedia(showreelUrl) || isRetiredMedia(str(fd, "showreelPoster"))) {
+      return { status: "error", message: "Please fix the highlighted fields.", errors: { showreelUrl: "That reel or poster was withdrawn. Use your own reel, under a new file name." } };
+    }
 
     const next: Profile = {
       ...current,
@@ -351,6 +364,7 @@ export async function saveProfile(_prev: FormState, fd: FormData): Promise<FormS
         })
         .filter((s) => s.label && /^https?:\/\//.test(s.url)),
       showreelUrl,
+      showreelCaptions: str(fd, "showreelCaptions").trim(),
       showreelPoster: posterUpload
         ? await uploadImage(posterUpload, "showreel", "poster")
         : str(fd, "showreelPoster").trim(),

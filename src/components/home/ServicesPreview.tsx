@@ -1,39 +1,38 @@
 import Link from "next/link";
-import SectionHeading from "../layout/SectionHeading";
 import type { Service } from "@/lib/types";
+import { serviceDetails } from "@/lib/service-details";
+import ServiceIcon from "@/components/services/ServiceIcon";
+import Section from "@/components/ui/Section";
+import SectionHeader from "@/components/ui/SectionHeader";
 
-/** Editorial list, not cards: number, title, one line, thin rules. */
+/** Ruled cards: icon, title, one line. Each opens its block on /services. */
 export default function ServicesPreview({ services }: { services: Service[] }) {
+  if (!services.length) return null;
   return (
-    <section className="container-site section" aria-labelledby="services-title">
-      <SectionHeading
-        id="services-title"
-        label="Services"
-        title="What we can help you create."
-        aside={
-          <Link href="/services" className="link-arrow">
-            All services <span className="arrow" aria-hidden>→</span>
-          </Link>
-        }
-      />
-      <ol className="mt-14 border-t border-ink">
-        {services.slice(0, 4).map((s, i) => (
-          <li key={s.id} className="grid-12 gap-y-2 border-b border-line py-6 md:py-8">
-            <span className="t-meta col-span-12 pt-2 text-secondary-aa md:col-span-1">{String(i + 1).padStart(2, "0")}</span>
-            <h3 className="col-span-12 font-display text-[22px] font-semibold uppercase leading-tight [font-stretch:88%] md:col-span-5 md:text-[28px]">
-              {s.title}
-            </h3>
-            <p className="col-span-12 text-[16px] text-secondary-aa md:col-span-5 md:col-start-8 md:pt-1">{s.description}</p>
+    <Section aria-labelledby="services-title">
+      <SectionHeader id="services-title" eyebrow="Services" title="What we can help you create." cta={{ href: "/services", label: "All services" }} />
+      <ul data-reveal-group className="mt-14 grid border-l border-t border-line sm:grid-cols-2 lg:grid-cols-3">
+        {services.map(serviceDetails).map((s) => (
+          <li key={s.id} className="border-b border-r border-line">
+            <Link
+              href={`/services#${s.slug}`}
+              prefetch={false}
+              data-service-card
+              className="group flex h-full flex-col p-6 -outline-offset-2 transition-colors duration-base hover:bg-surface md:p-8"
+            >
+              <ServiceIcon slug={s.slug} className="h-7 w-7 text-accent" />
+              <h3 className="t-h4 mt-8 uppercase stretch-condensed">{s.title}</h3>
+              <p className="mt-3 text-body-sm text-secondary">{s.description}</p>
+              <span className="t-meta mt-auto inline-flex items-center gap-2 pt-8 text-ink transition-colors duration-base group-hover:text-accent">
+                See what&apos;s included
+                <span aria-hidden className="arrow inline-block transition-transform duration-base">
+                  →
+                </span>
+              </span>
+            </Link>
           </li>
         ))}
-      </ol>
-      {services.length > 4 && (
-        <div className="mt-10 flex justify-center">
-          <Link href="/services" className="btn btn-primary">
-            View all {services.length} services <span className="arrow" aria-hidden>→</span>
-          </Link>
-        </div>
-      )}
-    </section>
+      </ul>
+    </Section>
   );
 }

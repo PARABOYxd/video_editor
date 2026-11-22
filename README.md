@@ -33,19 +33,21 @@ Postgres (`postgres`) · Vercel Blob · Zod. No UI or animation library.
 
 | Route | What it shows |
 |---|---|
-| `/` | Hero, selected work (asymmetric grid), showreel, services, about preview, contact call to action |
-| `/work` | Full portfolio with category filters (`?category=` in the URL, shareable) and an empty state |
-| `/work/[slug]` | Case study: video, overview, background, objective, approach, role, software, stills, related and next project |
-| `/about` | Portraits, introduction, philosophy, approach, journey, software |
-| `/services` | Each service with what you receive, what it suits, how it works, and a "Request a quote" link |
-| `/contact` | Inquiry form (name, email, project type, budget, deadline, description) plus email, WhatsApp and socials |
+| `/` | Hero, social proof, showreel, selected work, services, process, testimonials, about, FAQ. Sections with no real data stay hidden |
+| `/work` | Masonry grid with counted category filters (`?category=`, shareable); a "coming soon" card while there are fewer than four projects |
+| `/work/[slug]` | Player, meta row, brief / approach / result, stills with lightbox, related work, previous and next |
+| `/about` | Story, editor profiles, values, tools |
+| `/services` | Included, deliverables, turnaround, price and quote link per service, plus a comparison table |
+| `/contact` | Name, email, type, budget, deadline date, message, reference link, plus direct channels and response time |
 
 - Custom video player for MP4/WebM: play/pause, seek, time, mute, fullscreen,
   keyboard shortcuts, `preload="none"`, one video at a time, pauses when
   scrolled away. YouTube and Vimeo load only after "Play".
 - Contact form with validation, spam honeypot, rate limiting, and loading,
   success and error states. Inquiries are stored in the database.
-- Testimonials appear only once a genuine one is published.
+- Testimonials appear only once a genuine one is published or filled in the config.
+- A closing call to action above the footer on every page except `/contact`.
+- Withdrawn project URLs answer `410 Gone` (`src/lib/retired.ts`, `src/proxy.ts`).
 
 **Admin (`/admin`)**
 
@@ -77,6 +79,24 @@ SESSION_SECRET=...               # from admin:hash
 ```bash
 pnpm dev
 ```
+
+### Building on Windows
+
+If `pnpm build` fails on `/_global-error` or `/admin` with
+`Cannot read properties of null (reading 'useContext')`, the terminal was
+opened with a lowercase drive letter (`c:\...`, which VS Code can do). React
+then loads twice. Re-enter the folder with an uppercase drive first:
+
+```bash
+cd C:\Users\admin\Herd\Video_Editor
+pnpm build
+```
+
+In Git Bash use `cd 'C:/Users/admin/Herd/Video_Editor'`. Linux builds (Vercel)
+are not affected.
+
+Restart `pnpm dev` after a schema change: columns are added when the database
+is first opened.
 
 - Site: <http://localhost:3000>
 - Admin: <http://localhost:3000/admin>
@@ -145,19 +165,39 @@ Everything is edited in `/admin`:
 
 | Admin page | Controls |
 |---|---|
-| **Projects** | Title, category, year, optional client, format, short and full description, background, objective, approach, role, software, video link, aspect ratio, duration, thumbnail, poster, gallery stills, SEO title/description, featured, published, order |
+| **Projects** | Title, category, year, optional client, format, short and full description, background, objective, approach, result, role, software, project type, footage source, captions, video link, aspect ratio, duration, thumbnail, poster, gallery stills, SEO title/description, featured, published, order |
 | **Categories** | The filters on `/work` (empty categories show an empty state) |
 | **About & showreel** | Names, portraits, bios, hero copy, philosophy, approach, journey, what's different, software, email, phone, WhatsApp, social links, showreel link and poster |
 | **Services** | Title, short description, what the client receives, what it suits, process |
 | **Testimonials** | Hidden on the site until one is published. Only add genuine feedback, with permission |
 | **Inquiries** | Every contact form submission, with project type, budget and deadline |
 
+### Content that isn't in the admin
+
+[`src/config/content.ts`](src/config/content.ts) holds stats, client logos,
+extra testimonials, the process steps, FAQ, service inclusions, prices,
+turnaround, values and response time. Empty values stay off the site and out of
+structured data. Search the file for `TODO`.
+
+To be emailed about new inquiries, implement `src/lib/notify.ts`.
+
 ### Starter content
 
-The six projects shipped with the site are **placeholders**. They have no
-thumbnails and no video, so the site shows clearly labelled placeholder frames
-rather than borrowed imagery. The admin marks them "Placeholder"; saving a
-project removes the flag. Replace them with real work before launch.
+There are no starter projects and no starter showreel. An empty portfolio
+shows a "New work coming soon" card, and without a showreel that block is
+hidden.
+
+### Only your own work
+
+- Publish only edits you made. Never download or re-host another creator's
+  video, poster or showreel.
+- Set **Project type** on each project. Until it is set, structured data
+  doesn't name the studio as creator.
+  - `client`: commissioned work. Name a client only with their agreement.
+  - `spec`: your own edit of **royalty-free or licensed** footage. It needs a
+    **Footage source** (e.g. "Pexels") and shows a "Spec project" badge.
+- Slugs and file names in `src/lib/retired.ts` were withdrawn. They stay off
+  the public site and can't be saved again, so don't remove entries from it.
 
 The profile copy is first person plural ("we") because this is a duo. Change
 any of it in **About & showreel**.
@@ -183,38 +223,46 @@ any of it in **About & showreel**.
 
 ## Design system
 
-Defined as Tailwind theme tokens in [`src/app/globals.css`](src/app/globals.css).
+Every token lives in the `@theme` block of [`src/app/globals.css`](src/app/globals.css).
+Use the tokens, never raw values.
 
 **Colour**
 
 | Token | Hex | Use |
 |---|---|---|
 | `paper` | `#F5F3EE` | Page background |
-| `ink` | `#171717` | Text, primary button |
-| `secondary` | `#77736D` | Large text (18px+) or text on white |
-| `secondary-aa` | `#6E6A64` | Small secondary text on the page background (4.85:1, WCAG AA) |
-| `muted` | `#96918A` | Non-text details, and text on the dark media background |
-| `accent` | `#A64D32` | Sparing highlights: "Let's Talk", active nav, form CTA |
-| `accent-hover` | `#873D29` | Accent hover |
-| `line` | `#D8D4CC` | Borders and rules |
 | `surface` | `#FFFFFF` | Form fields, white panels |
-| `media` | `#111111` | Video background, showreel band, placeholders |
+| `media` / `scrim` | `#111111` / `#000000` | Video background / overlays on media |
+| `ink` | `#171717` | Primary text, primary button |
+| `secondary` | `#6E6A64` | Secondary text at any size (4.85:1 on paper, WCAG AA) |
+| `muted` | `#96918A` | Decoration on paper, text only on `media` |
+| `on-dark` | `#FFFFFF` | Text and icons on dark or accent backgrounds |
+| `line` | `#D8D4CC` | Borders and rules |
+| `accent` / `accent-hover` | `#A64D32` / `#873D29` | Sparing highlights |
+| `danger`, `success`, `warning*` | | Status messages |
 
-`#77736D` measures 4.25:1 on the background, just under AA for small text,
-so small secondary text uses `secondary-aa` instead.
+`src/config/theme.ts` repeats the few colours that CSS variables can't reach.
 
-**Type:** Archivo for headings (slightly condensed, uppercase), DM Sans for
-body, IBM Plex Mono for labels and metadata. Italic is used once per heading
-at most. Classes: `t-hero`, `t-page`, `t-section`, `t-project`, `t-meta`,
-`t-lead`, `t-italic`.
+**Fonts:** subsets in `src/app/fonts` (weights 400-700 only; licences alongside).
+A weight or script outside that needs a new subset.
 
-**Layout:** 1440px max, 1280px content, 64 / 32 / 20px side padding
-(`container-site`), 12-column grid (`grid-12`), section spacing
-136 / 96 / 72px (`section`). Corners 2–6px. Borders instead of shadows.
+**Type:** Archivo for headings (condensed, uppercase, with one italic word at
+most), DM Sans for body, IBM Plex Mono for labels. Fluid classes: `t-display`,
+`t-h1`, `t-h2`, `t-h3`, `t-h4`, `t-statement`, `t-quote`, `t-lead`, `t-prose`.
+Fixed utilities: `text-body-lg`, `text-body`, `text-body-sm`, `text-small`,
+`text-label`, `text-caption`. Long copy stops at `65ch`.
 
-**Motion:** 200ms transitions, a subtle image scale and arrow nudge on hover,
-and a single 500ms fade-in for some sections. No scroll-jacking, parallax or
-cursor effects. Everything respects `prefers-reduced-motion`.
+**Space:** 4px steps, plus fluid `gutter`, `grid`, `section`, `block`,
+`page-top` and `page-bottom`. **Layers:** `z-float`, `z-header`, `z-overlay`, `z-skip`.
+**Timing:** `duration-fast`, `base`, `slow`, `drawer`, `slower`.
+
+**Components** (`src/components/ui`): `Button`, `Badge`, `Card`, `Container`,
+`Section`, `SectionHeader`, `Eyebrow`.
+
+**Motion:** the header hides on scroll down and returns on scroll up. Mark a
+block `data-reveal`, or a list `data-reveal-group`, for a scroll reveal.
+`data-cursor="Play"` gives the custom cursor (mouse only). Route changes fade.
+Hover previews are desktop only. All of it is off with `prefers-reduced-motion`.
 
 ---
 
@@ -228,27 +276,35 @@ src/
     actions/inquiry.ts   contact form server action
     globals.css          design tokens and type scale
     layout.tsx           fonts and root metadata
-    sitemap.ts, robots.ts, not-found.tsx
+    og/[page]/           generated share images
+    sitemap.ts, robots.ts, manifest.ts, not-found.tsx, error.tsx, global-error.tsx
   components/
-    layout/              Header, Footer, SectionHeading
-    home/                Hero, FeaturedWork, Showreel, ServicesPreview, AboutPreview, ContactCTA, Testimonials
-    portfolio/           ProjectCard, ProjectThumbnail, ProjectGrid (filters), ProjectMetadata, RelatedProjects
+    layout/              Header, Footer, ClosingCTA, BackToTop, Logo
+    motion/              ScrollReveal, PageTransition, CustomCursor
+    seo/                 JsonLd
+    home/                Hero, ReelLightbox, FeaturedWork, ServicesPreview, AboutPreview, Testimonials
+    portfolio/           ProjectCard, ComingSoonCard, ProjectThumbnail, ProjectGrid (filters), ProjectMetadata, RelatedProjects
     about/               SoftwareList
     contact/             ContactForm, ContactDetails
-    ui/                  VideoPlayer, Img, PlaceholderFrame, Reveal
+    ui/                  VideoPlayer, HoverVideo, Img, PlaceholderFrame, Button, Badge, Card, Section
     admin/               ProjectForm, ProfileForm, RowForm, ui
+  config/                content.ts (placeholders), location.ts, theme.ts
   lib/
+    inquiry.ts           contact form rules, shared by browser and server
+    service-details.ts   services joined with config/content.ts
+    notify.ts            TODO: inquiry emails
+    retired.ts           withdrawn slugs and files
     db.ts                Postgres in production, PGlite locally; schema, migrations, seeding
-    content.ts           all reads (with starter-content fallback when there's no database)
+    content.ts           all reads (seed profile and services when there's no database)
     seed.ts              starter content
     types.ts             data types
-    validation.ts        Zod schemas, form options
+    validation.ts        Zod schemas for the admin
     video.ts             YouTube / Vimeo / file link parsing
     seo.ts               metadata and JSON-LD helpers
     upload.ts            image uploads (Vercel Blob, or public/uploads locally)
     auth/                session cookie, password hash, access checks
     env.ts, rate-limit.ts
-  proxy.ts               redirects /admin to login without a session
+  proxy.ts               410 for withdrawn URLs, /admin login redirect
 scripts/
   hash-password.mjs      pnpm admin:hash
 ```
@@ -262,7 +318,7 @@ scripts/
 - Open Graph and Twitter cards, `sitemap.xml` (includes every project),
   `robots.txt` (admin excluded), JSON-LD for the studio, breadcrumbs and
   project videos.
-- Old URLs `/projects` and `/projects/:slug` redirect to `/work`.
+- Old URLs `/projects` and `/projects/:slug` redirect to `/work`; withdrawn slugs answer 410.
 - Semantic headings (one `h1` per page), skip link, visible focus states,
   labelled form fields with announced errors, keyboard-operable video controls
   with labels, WCAG AA text contrast, reduced-motion support.
@@ -291,17 +347,17 @@ scripts/
 - **YouTube/Vimeo** use their own player controls.
 - **Local uploads** (`public/uploads`) are served by `pnpm dev`; `pnpm start`
   only serves files that existed at build time. Production uses Vercel Blob.
-- There's no email notification for new inquiries yet; check `/admin/inquiries`.
+- There's no email notification for new inquiries yet (`src/lib/notify.ts`); check `/admin/inquiries`.
 
 ---
 
 ## Before launch checklist
 
-- [ ] Replace the six placeholder projects with real work (video, thumbnail, case study)
+- [ ] Add your own projects (video, thumbnail, case study, project type)
 - [ ] Add your showreel link and poster in **About & showreel**
 - [ ] Check email, phone (currently a placeholder), WhatsApp number and social links
 - [ ] Confirm the software list only includes tools you actually use
+- [ ] Fill the TODOs in `src/config/content.ts` (see `CHECKLIST.md`)
 - [ ] Set `NEXT_PUBLIC_SITE_URL` to the real domain
 - [ ] Use a strong admin password in production (different from your local one)
-- [ ] Delete `public/videos/` and `public/images/showreel-poster.jpg` from your machine
-      (third-party film assets; already git-ignored and unused)
+- [ ] Make sure no withdrawn video is left in the R2 bucket, Blob store or old deployments

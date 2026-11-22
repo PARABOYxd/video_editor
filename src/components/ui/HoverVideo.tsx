@@ -1,37 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Badge from "@/components/ui/Badge";
 
 /** "x.mp4" → "x-preview.mp4": a short, small, silent loop made for previews. */
 const previewOf = (src: string) => src.replace(/(\.[a-z0-9]+)(\?.*)?$/i, "-preview$1$2");
 
-/*
- * Touch screens have no hover, so the card that is most on screen previews,
- * and only that one: one shared registry picks the winner on every change.
- */
-type Candidate = { ratio: number; on: () => void; off: () => void };
-const candidates = new Map<Element, Candidate>();
-let current: Element | null = null;
-
-function pickPreview() {
-  let best: Element | null = null;
-  let bestRatio = 0.6; // at least 60% visible
-  for (const [el, c] of candidates) {
-    if (c.ratio >= bestRatio) {
-      best = el;
-      bestRatio = c.ratio;
-    }
-  }
-  if (best === current) return;
-  if (current) candidates.get(current)?.off();
-  current = best;
-  if (best) candidates.get(best)?.on();
-}
+const AMBIENT_DELAY = 1500;
 
 /**
  * Muted looping preview layered over a still.
- *  - mode="hover": plays while the parent `.group` is hovered/focused. On touch
- *    screens it plays for the one card most on screen.
+ *  - mode="hover": desktop only. Plays while the parent `.group` is hovered
+ *    or focused; touch screens keep the still and download nothing.
  *  - mode="auto": plays on mount (hero).
  * Only the light "-preview" clip is ever loaded. If it is missing the still
  * stays: the full file is never downloaded just for a preview. Reduced-motion
@@ -60,28 +40,33 @@ export default function HoverVideo({ src, mode = "hover" }: { src: string; mode?
     };
 
     if (mode === "auto") {
-      on();
-      return off;
-    }
-
-    if (!window.matchMedia("(hover: hover)").matches) {
-      const entry: Candidate = { ratio: 0, on, off };
-      candidates.set(video, entry);
+      // Decoration, so it waits: in view, and only after the page has loaded and gone quiet.
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      let inView = false;
+      const schedule = () => {
+        clearTimeout(timer);
+        if (inView && document.readyState === "complete") timer = setTimeout(on, AMBIENT_DELAY);
+      };
       const io = new IntersectionObserver(
-        ([e]) => {
-          entry.ratio = e.intersectionRatio;
-          pickPreview();
+        ([entry]) => {
+          inView = entry.isIntersecting;
+          if (inView) return schedule();
+          clearTimeout(timer);
+          off();
         },
-        { threshold: [0, 0.6, 0.75, 0.9, 1] }
+        { threshold: 0.35 }
       );
       io.observe(video);
+      window.addEventListener("load", schedule);
       return () => {
         io.disconnect();
-        candidates.delete(video);
-        if (current === video) current = null;
+        clearTimeout(timer);
+        window.removeEventListener("load", schedule);
         off();
       };
     }
+
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
     const group = video.closest(".group");
     if (!group) return;
@@ -115,18 +100,19 @@ export default function HoverVideo({ src, mode = "hover" }: { src: string; mode?
           setActive(false);
           setMissing(true);
         }}
-        className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${visible ? "opacity-100" : "opacity-0"}`}
+        className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-slower ${visible ? "opacity-100" : "opacity-0"}`}
       />
       {mode === "hover" && (
-        <span
+        <Badge
+          variant="overlay"
           aria-hidden
-          className={`pointer-events-none absolute left-3 top-3 flex items-center gap-1.5 rounded bg-black/60 px-2 py-1 font-mono text-[11px] uppercase tracking-[0.08em] text-white backdrop-blur-sm transition-opacity duration-300 ${
+          className={`pointer-events-none absolute left-3 top-3 transition-opacity duration-slow ${
             visible ? "opacity-100" : "opacity-0"
           }`}
         >
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
           Preview
-        </span>
+        </Badge>
       )}
     </>
   );

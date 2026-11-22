@@ -32,15 +32,11 @@ next-env.d.ts
 # ── Media that must not be committed ───────────────────────────
 # Video files don't belong in git (size limits, slow clones). Host videos on
 # YouTube / Vimeo / Vercel Blob and paste the link in the admin.
-# The files currently in public/videos are a third-party film trailer
-# (Brain Farm, "View From A Blue Moon") and are not used by the site.
 /public/videos/
 *.mp4
 *.mov
 *.webm
 *.m4v
-# Poster of that same third-party film (unused)
-/public/images/showreel-poster.jpg
 
 # ── Testing / tooling ──────────────────────────────────────────
 /coverage

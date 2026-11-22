@@ -13,12 +13,12 @@ export default async function PanelLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-dvh bg-paper">
-      <header className="border-b border-line bg-white">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-          <Link href="/admin" className="text-[15px] font-semibold">Portfolio admin</Link>
-          <div className="flex items-center gap-4 text-[14px]">
+          <Link href="/admin" className="text-body-sm font-semibold">Portfolio admin</Link>
+          <div className="flex items-center gap-4 text-small">
             <Link href="/" target="_blank" className="link-u">View site</Link>
-            <span className="hidden text-secondary-aa sm:inline">{admin.email}</span>
+            <span className="hidden text-secondary sm:inline">{admin.email}</span>
             <form action={logout}>
               <button type="submit" className="link-u">Sign out</button>
             </form>
@@ -27,12 +27,12 @@ export default async function PanelLayout({ children }: { children: React.ReactN
       </header>
 
       {!db && (
-        <p className="border-b border-amber-300 bg-amber-50 px-5 py-3 text-center text-[14px] text-amber-900">
+        <p className="border-b border-warning-line bg-warning-soft px-5 py-3 text-center text-small text-warning">
           Read-only: no database is connected, so you are seeing the starter content. Set <code className="font-mono">DATABASE_URL</code> to save changes.
         </p>
       )}
 
-      <div className="mx-auto grid max-w-6xl gap-8 px-5 py-8 md:grid-cols-[200px_1fr]">
+      <div className="mx-auto grid max-w-6xl gap-8 px-5 py-8 md:grid-cols-[var(--spacing-sidebar)_1fr]">
         <aside>
           <AdminNav unread={counts.unread} />
         </aside>

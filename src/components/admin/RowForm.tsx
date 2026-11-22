@@ -49,7 +49,7 @@ export default function RowForm({
         const span = f.wide ? "sm:col-span-6" : f.type === "number" || f.type === "checkbox" ? "sm:col-span-1" : "sm:col-span-3";
         if (f.type === "checkbox") {
           return (
-            <label key={f.name} className={`${span} flex items-center gap-2 pt-7 text-[14px]`}>
+            <label key={f.name} className={`${span} flex items-center gap-2 pt-7 text-small`}>
               <input type="checkbox" name={f.name} defaultChecked={Boolean(f.value)} className="h-4 w-4" /> {f.label}
             </label>
           );
@@ -72,7 +72,7 @@ export default function RowForm({
                 aria-invalid={!!e[f.name]}
               />
             )}
-            {f.hint && !e[f.name] && <p className="mt-1.5 text-[12.5px] text-secondary-aa">{f.hint}</p>}
+            {f.hint && !e[f.name] && <p className="mt-1.5 text-caption text-secondary">{f.hint}</p>}
             {e[f.name] && <p className="field-error">{e[f.name]}</p>}
           </div>
         );

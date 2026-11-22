@@ -6,7 +6,7 @@ export default async function NewProject() {
   await requireAdmin();
   return (
     <div>
-      <h1 className="t-section mb-6 !text-[40px]">Add project</h1>
+      <h1 className="t-h2 mb-6 !text-title">Add project</h1>
       <ProjectForm categories={await getCategories()} />
     </div>
   );

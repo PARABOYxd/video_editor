@@ -1,115 +1,129 @@
-import ContactCTA from "@/components/home/ContactCTA";
+import Link from "next/link";
+import { VALUES } from "@/config/content";
+import { LOCATION } from "@/config/location";
 import SoftwareList from "@/components/about/SoftwareList";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import JsonLd from "@/components/seo/JsonLd";
+import Button from "@/components/ui/Button";
+import Container from "@/components/ui/Container";
+import Eyebrow from "@/components/ui/Eyebrow";
 import Img from "@/components/ui/Img";
+import Section from "@/components/ui/Section";
+import SectionHeader from "@/components/ui/SectionHeader";
 import { getProfile } from "@/lib/content";
-import { pageMetadata } from "@/lib/seo";
+import { pageMetadata, peopleJsonLd } from "@/lib/seo";
 
 export const revalidate = 3600;
 
 export async function generateMetadata() {
   const profile = await getProfile();
   return pageMetadata({
-    title: "About",
-    description: `${profile.intro} ${profile.experience}`.slice(0, 158),
+    title: "About Our Video Editors in Pune, India",
+    description: `Meet the two video editors behind ${profile.brandName} in Pune, India, and see how we shape story, pacing, sound and colour for YouTube creators and brands.`,
     path: "/about",
-    image: profile.team[0]?.photoUrl,
+    og: "about",
   });
-}
-
-function Block({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <section className="grid-12 gap-y-4 border-t border-line pt-8">
-      <h2 className="t-meta col-span-12 flex items-center gap-3 text-secondary-aa md:col-span-4">
-        <span aria-hidden className="h-px w-8 bg-accent" />
-        {label}
-      </h2>
-      <div className="col-span-12 text-[17px] leading-[1.7] md:col-span-8">{children}</div>
-    </section>
-  );
 }
 
 export default async function AboutPage() {
   const profile = await getProfile();
-  const [a, b] = profile.team;
 
   return (
     <>
-      <header className="container-site pt-12 md:pt-20">
-        <p className="t-meta flex items-center gap-3 text-secondary-aa">
-          <span aria-hidden className="h-px w-8 bg-accent" />
-          About · {profile.brandName}
-        </p>
-        <h1 className="t-page mt-5 max-w-[15ch]">
+      <JsonLd data={peopleJsonLd(profile)} />
+      <Container as="header" className="pt-6">
+        <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
+        <Eyebrow className="mt-8">
+          About · {profile.brandName}, {LOCATION.city}
+        </Eyebrow>
+        <h1 className="t-h1 mt-5 max-w-headline-lg">
           Behind <em className="t-italic">every</em> frame, there&apos;s a story.
         </h1>
-      </header>
+      </Container>
 
-      {/* Portraits: one large, one smaller and offset */}
-      <section className="container-site mt-14 md:mt-20" aria-label="Portraits">
-        <div className="grid-12 gap-y-10">
-          {a && (
-            <figure className="col-span-12 md:col-span-7">
-              <div className="relative aspect-[4/5] overflow-hidden rounded bg-surface md:aspect-[5/6]">
-                <Img src={a.photoUrl} alt={`Portrait of ${a.name}`} fill priority sizes="(min-width: 768px) 58vw, 100vw" className="object-cover" />
-              </div>
-              <figcaption className="mt-3 flex justify-between gap-4">
-                <span className="text-[15px] font-medium">{a.name}</span>
-                <span className="t-meta text-secondary-aa">{a.role}</span>
-              </figcaption>
-              {a.bio && <p className="mt-2 max-w-md text-[15px] text-secondary-aa">{a.bio}</p>}
-            </figure>
-          )}
-          {b && (
-            <figure className="col-span-10 col-start-3 md:col-span-4 md:col-start-9 md:mt-48">
-              <div className="relative aspect-[4/5] overflow-hidden rounded bg-surface">
-                <Img src={b.photoUrl} alt={`Portrait of ${b.name}`} fill sizes="(min-width: 768px) 33vw, 80vw" className="object-cover" />
-              </div>
-              <figcaption className="mt-3 flex justify-between gap-4">
-                <span className="text-[15px] font-medium">{b.name}</span>
-                <span className="t-meta text-secondary-aa">{b.role}</span>
-              </figcaption>
-              {b.bio && <p className="mt-2 text-[15px] text-secondary-aa">{b.bio}</p>}
-            </figure>
-          )}
+      <Section id="story" className="grid-12 gap-y-8" aria-labelledby="story-title">
+        <div className="col-span-12 lg:col-span-4">
+          <Eyebrow as="h2" id="story-title">
+            Our story
+          </Eyebrow>
         </div>
-      </section>
+        <div className="col-span-12 lg:col-span-8">
+          <p className="t-statement">{profile.intro}</p>
+          <div className="t-prose mt-8 space-y-4 text-secondary">
+            {profile.experience && <p>{profile.experience}</p>}
+            {profile.philosophy && <p>{profile.philosophy}</p>}
+            <p>
+              You can see that thinking in{" "}
+              <Link href="/work" className="tap-target link-u text-ink">
+                our portfolio
+              </Link>
+              , and in each of our{" "}
+              <Link href="/services" className="tap-target link-u text-ink">
+                video editing services
+              </Link>
+              .
+            </p>
+          </div>
+        </div>
+      </Section>
 
-      {/* Introduction */}
-      <section className="container-site section grid-12 gap-y-6">
-        <p className="col-span-12 font-display text-[clamp(26px,3vw,40px)] font-medium leading-[1.2] lg:col-span-9">{profile.intro}</p>
-      </section>
+      <Section id="editors" bleed className="border-y border-line bg-surface" aria-labelledby="editors-title">
+        <SectionHeader id="editors-title" eyebrow="The editors" title="Two editors, one cut." />
+        <ul data-reveal-group className="mt-14 grid gap-x-8 gap-y-12 md:grid-cols-2 lg:gap-x-20">
+          {profile.team.map((m, i) => (
+            <li key={m.name} className={i % 2 ? "md:mt-24" : ""}>
+              <div className="relative aspect-portrait overflow-hidden rounded bg-paper">
+                {m.photoUrl && (
+                  <Img
+                    src={m.photoUrl}
+                    alt={`Portrait of ${m.name}, ${m.role} at ${profile.brandName}`}
+                    fill
+                    sizes="(min-width: 1408px) 600px, (min-width: 768px) 44vw, 92vw"
+                    className="object-cover"
+                  />
+                )}
+              </div>
+              <h3 className="t-h4 mt-5">{m.name}</h3>
+              <p className="t-meta mt-1 text-secondary">{m.role}</p>
+              {m.bio && <p className="mt-3 max-w-md text-body text-secondary">{m.bio}</p>}
+            </li>
+          ))}
+        </ul>
+      </Section>
 
-      <div className="container-site space-y-14 pb-24 md:pb-32">
-        {profile.philosophy && (
-          <Block label="Creative philosophy">
-            <p>{profile.philosophy}</p>
-          </Block>
-        )}
-        {profile.approach && (
-          <Block label="Editing approach">
-            <p>{profile.approach}</p>
-          </Block>
-        )}
-        {profile.experience && (
-          <Block label="Professional journey">
-            <p>{profile.experience}</p>
-          </Block>
-        )}
+      <Section id="values" aria-labelledby="values-title">
+        <SectionHeader id="values-title" eyebrow="Values & approach" title="How we think in the edit." description={profile.approach} />
+        <ul data-reveal-group className="mt-14 grid gap-8 md:grid-cols-3">
+          {VALUES.map((value) => (
+            <li key={value.title} className="border-t border-ink pt-6">
+              <h3 className="t-h4 uppercase stretch-condensed">{value.title}</h3>
+              <p className="mt-3 text-body-sm text-secondary">{value.text}</p>
+            </li>
+          ))}
+        </ul>
         {profile.difference && (
-          <Block label="What's different">
-            <p>{profile.difference}</p>
-          </Block>
+          <p data-reveal className="t-prose mt-12">
+            {profile.difference}
+          </p>
         )}
-        {profile.software.length > 0 && (
-          <Block label="Software">
-            <SoftwareList software={profile.software} />
-          </Block>
-        )}
-      </div>
+      </Section>
 
-      <div className="border-t border-line">
-        <ContactCTA profile={profile} />
-      </div>
+      {profile.software.length > 0 && (
+        <Section id="tools" bleed className="border-t border-line" aria-labelledby="tools-title">
+          <SectionHeader id="tools-title" eyebrow="Tools & software" title="What we cut with." />
+          <div className="mt-12">
+            <SoftwareList software={profile.software} />
+          </div>
+          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <Button href="/contact" variant="accent" arrow>
+              Work with us
+            </Button>
+            <Button href="/services" variant="link" arrow>
+              See the services
+            </Button>
+          </div>
+        </Section>
+      )}
     </>
   );
 }

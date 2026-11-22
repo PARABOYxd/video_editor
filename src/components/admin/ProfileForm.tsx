@@ -5,13 +5,14 @@ import { saveProfile, type FormState } from "@/app/admin/actions";
 import { Field, FormMessage, Submit } from "./ui";
 import { useFormAction } from "../useFormAction";
 import type { Profile } from "@/lib/types";
+import Card from "@/components/ui/Card";
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded border border-line bg-white p-5 sm:p-6">
-      <h2 className="mb-5 text-[16px] font-semibold">{title}</h2>
+    <Card as="section" padding="none" className="p-5 sm:p-6">
+      <h2 className="mb-5 text-body font-semibold">{title}</h2>
       <div className="grid gap-5 sm:grid-cols-2">{children}</div>
-    </section>
+    </Card>
   );
 }
 
@@ -31,9 +32,9 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      <Card title="Showreel">
+      <Panel title="Showreel">
         <div className={wide}>
-          <Field label="Showreel link" name="showreelUrl" error={e.showreelUrl} hint="Your own reel on YouTube, Vimeo, or a direct .mp4 link. Leave empty to feature your first project instead.">
+          <Field label="Showreel link" name="showreelUrl" error={e.showreelUrl} hint="Your own reel on YouTube, Vimeo, or a direct .mp4 link. Leave empty to hide the showreel block on the homepage.">
             {input("showreelUrl", { type: "url", placeholder: "https://vimeo.com/…" })}
           </Field>
         </div>
@@ -43,9 +44,14 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         <Field label="…or poster URL" name="showreelPoster">
           {input("showreelPoster")}
         </Field>
-      </Card>
+        <div className={wide}>
+          <Field label="Showreel captions (.vtt, optional)" name="showreelCaptions" hint="For an MP4 / WebM reel with speech.">
+            {input("showreelCaptions")}
+          </Field>
+        </div>
+      </Panel>
 
-      <Card title="Identity and hero">
+      <Panel title="Identity and hero">
         <Field label="Full name(s)" name="brandName">{input("brandName")}</Field>
         <Field label="Short name" name="shortName" hint="Used in the header, e.g. “Rishab & Kunal”.">{input("shortName")}</Field>
         <Field label="Role" name="roleTitle">{input("roleTitle")}</Field>
@@ -65,9 +71,9 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
         <div className={wide}>
           <Field label="Footer description" name="footerBlurb">{area("footerBlurb", profile.footerBlurb, 2)}</Field>
         </div>
-      </Card>
+      </Panel>
 
-      <Card title="About">
+      <Panel title="About">
         <div className={wide}><Field label="Introduction" name="intro">{area("intro", profile.intro)}</Field></div>
         <div className={wide}><Field label="Creative philosophy" name="philosophy">{area("philosophy", profile.philosophy)}</Field></div>
         <div className={wide}><Field label="Editing approach" name="approach" hint="Pacing, storytelling, sound, composition, detail.">{area("approach", profile.approach)}</Field></div>
@@ -78,10 +84,10 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
             {area("software", profile.software.join("\n"), 5)}
           </Field>
         </div>
-      </Card>
+      </Panel>
 
       {profile.team.map((m, i) => (
-        <Card key={i} title={`Person ${i + 1}: ${m.name}`}>
+        <Panel key={i} title={`Person ${i + 1}: ${m.name}`}>
           <Field label="Name" name={`team${i}_name`}>
             <input id={`team${i}_name`} name={`team${i}_name`} defaultValue={m.name} className="field-input" />
           </Field>
@@ -99,10 +105,10 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
           <Field label="…or photo URL" name={`team${i}_photoUrl`}>
             <input id={`team${i}_photoUrl`} name={`team${i}_photoUrl`} defaultValue={m.photoUrl} className="field-input" />
           </Field>
-        </Card>
+        </Panel>
       ))}
 
-      <Card title="Contact">
+      <Panel title="Contact">
         <Field label="Email" name="email">{input("email", { type: "email" })}</Field>
         <Field label="Phone (as displayed)" name="phone">{input("phone")}</Field>
         <Field label="WhatsApp number" name="whatsapp" hint="Country code + number, e.g. 919820012345.">{input("whatsapp", { inputMode: "numeric" })}</Field>
@@ -111,7 +117,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
             {area("socials", profile.socials.map((s) => `${s.label} | ${s.url}`).join("\n"), 4)}
           </Field>
         </div>
-      </Card>
+      </Panel>
 
       <div className="sticky bottom-0 -mx-1 flex flex-wrap items-center gap-4 bg-paper/95 px-1 py-4 backdrop-blur">
         <Submit pending={pending}>Save changes</Submit>
