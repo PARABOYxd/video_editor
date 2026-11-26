@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Dev only: lets a phone on the same Wi-Fi open http://<this-pc-ip>:3000.
+  // Without it Next blocks the dev endpoints and the page never hydrates.
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*", "172.*.*.*"],
   images: {
     formats: ["image/avif", "image/webp"],
     // The widest slot is 1280px: nothing needs the 3840px default.
